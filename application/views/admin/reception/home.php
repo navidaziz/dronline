@@ -101,13 +101,14 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
         <table style="width: 100%;">
           <tr>
             <td colspan="2">
-              <div style="padding: 5px;">
-                Search By Filled By Patient ID:
+              <div style="padding: 5px; background-color:lightgray; margin-bottom:10px; border-radius:5px; border:1px solid gray;">
+                <strong> Search By Patient ID: (Old Patient) </strong>
                 <input class="form-control" type="text" id="patientId" name="patientId" value="" placeholder="Patient ID" />
               </div>
             </td>
           </tr>
           <tr>
+
             <td>Patient Name: </td>
 
             <td>
@@ -277,7 +278,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
             <table class="table table-bordered">
               <tr>
                 <td>#</td>
-                <td>Test Name</td>
+                <td>Dr. Appointment</td>
                 <td>Price</td>
               </tr>
 
@@ -339,7 +340,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
             </div>
             <input type="hidden" name="testGroupIDs" value="" id="testGroupIDs" />
           </div>
-          <input type="submit" name="submit" value="Save and Print" class="btn btn-primary" style="width:100%">
+          <input type="submit" name="submit" value="Add Patient Appointment" class="btn btn-primary" style="width:100%">
         </div>
 
 
@@ -424,17 +425,21 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
           <thead>
             <tr>
               <th>#</th>
+              <th>History No</th>
               <th>Appointment No</th>
               <th>Patient ID</th>
               <th>Patient Name</th>
               <th>Contact No</th>
               <th>Gender</th>
+              <th>Token</th>
               <th>Status</th>
               <th>Action</th>
               <th>Dr. Report</th>
             </tr>
           </thead>
-          <?php foreach ($all_tests as $test) {
+          <?php
+          $count = 1;
+          foreach ($all_tests as $test) {
             $color = '';
             if ($test->status == 1) {
               $color = "#E9F1FC";
@@ -453,6 +458,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
               text-decoration: line-through;
             <?php }  ?>
             ">
+              <td><?php echo $count++; ?> </td>
               <td><?php echo $test->invoice_id; ?> </td>
               <td><?php
                   if ($test->category_id != 5) {
@@ -467,6 +473,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
               <td><a href="#" onclick="update_patient_detail('<?php echo $test->patient_id; ?>')"><?php echo $test->patient_name; ?></a></td>
               <td><?php echo $test->patient_mobile_no; ?></td>
               <td><?php echo $test->patient_gender; ?></td>
+              <td><a target="new" href="<?php echo site_url(ADMIN_DIR . "reception/print_token/" . $test->invoice_id); ?>"><i class="fa fa-print"></i> Print</a></td>
 
               <td>
                 <?php if ($test->status == 1) { ?>
@@ -482,7 +489,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
               <td><a href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a></td>
               <td>
                 <?php if ($test->status == 3) { ?>
-                  <a style="margin-left: 10px;" target="new" href="<?php echo site_url(ADMIN_DIR . "recption/print_patient_test_report/$test->invoice_id") ?>"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>
+                  <a style="margin-left: 10px;" target="new" href="<?php echo site_url(ADMIN_DIR . "reception/print_patient_report/$test->invoice_id") ?>"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>
                 <?php } ?>
               </td>
             </tr>

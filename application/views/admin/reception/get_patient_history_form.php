@@ -146,7 +146,9 @@
                   <?php } ?>
                 </tbody>
               </table>
-              <input type="submit" value="Create Patient History" name="Create Patient History" />
+              <p style="text-align: center;">
+                <input class="btn btn-danger btn-sm" type="submit" value="Add Patient Test" name="Add Patient Test" />
+              </p>
             </form>
             <script>
               $(document).ready(function() {

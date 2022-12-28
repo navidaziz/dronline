@@ -113,8 +113,10 @@ class Dr_dashboard extends Admin_Controller
 
 		$invoice_id = (int) $invoice_id;
 		$completed_date = date('Y-m-d H:i:s');
+		$user_id = $this->session->userdata('user_id');
 		$query = "UPDATE `invoices` 
-				SET `status`='3', `completed_date` = '" . $completed_date . "'
+				SET `status`='3', `completed_date` = '" . $completed_date . "',
+				`test_report_by` = '" . $user_id . "'
 			    WHERE `invoice_id` = '" . $invoice_id . "'";
 
 		if ($this->db->query($query)) {

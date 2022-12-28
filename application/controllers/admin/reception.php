@@ -146,8 +146,7 @@ class Reception extends Admin_Controller
 		$test_token_id = time();
 		$query = "UPDATE `invoices` 
 					SET `test_token_id`='" . $test_token_id . "',
-						`test_report_by`='" . $this->session->userdata("user_id") . "',
-						`status`='" . $status . "'
+					`status`='" . $status . "'
 					WHERE `invoice_id` = '" . $invoice_id . "'";
 		$this->db->query($query);
 
@@ -422,6 +421,8 @@ class Reception extends Admin_Controller
 		$this->load->view(ADMIN_DIR . "layout", $this->patient_test_data($invoice_id));
 	}
 
+
+
 	public function patient_test_data($invoice_id)
 	{
 		$invoice_id = (int) $invoice_id;
@@ -646,5 +647,19 @@ class Reception extends Admin_Controller
 		} else {
 			redirect(ADMIN_DIR . "reception");
 		}
+	}
+
+	public function print_token($invoice_id)
+	{
+
+		$invoice_id = (int) $invoice_id;
+
+		$this->load->view(ADMIN_DIR . "reception/print_token", $this->patient_test_data($invoice_id));
+	}
+
+	public function print_patient_report($invoice_id)
+	{
+		$invoice_id = (int) $invoice_id;
+		$this->load->view(ADMIN_DIR . "dr_dashboard/print_patient_report", $this->patient_test_data($invoice_id));
 	}
 }
