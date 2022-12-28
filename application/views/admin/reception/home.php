@@ -479,7 +479,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
                   Completed
                 <?php } ?>
               </td>
-              <td><a target="new" href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a></td>
+              <td><a href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a></td>
               <td>
                 <?php if ($test->status == 3) { ?>
                   <a style="margin-left: 10px;" target="new" href="<?php echo site_url(ADMIN_DIR . "recption/print_patient_test_report/$test->invoice_id") ?>"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>
