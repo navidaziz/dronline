@@ -72,6 +72,11 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
         <img src="<?php echo site_url("assets/uploads/" . $log); ?>" alt="<?php echo $system_global_settings[0]->system_title ?>" 
         title="<?php echo $system_global_settings[0]->system_title ?>" class="img-responsive " style="width:40px !important;"></a>-->
               <strong>Dr. Online</strong>
+              <br />
+              Current User: <?php $user_id = $this->session->userdata("user_id");
+                            $query = "SELECT user_title FROM users WHERE user_id = '" . $user_id . "'";
+                            echo $this->db->query($query)->row()->user_title;
+                            ?>
             </td>
             <td style="font-size:12px">
               <ul class="nav navbar-nav pull-right" style="padding:0px">
