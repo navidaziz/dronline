@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>jQuery Tree Widget demo</title>
+
+    <!-- styles for demo purpose -->
+    <style type="text/css">
+        body {
+            font-family: verdana, arial;
+            font-size: 0.8em;
+        }
+
+        code {
+            white-space: pre;
+        }
+    </style>
+
+    <!-- start tree configuration -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css"/>
+
+
+    <!-- start development configuration -->
+    <script type="text/javascript" src="src/js/jquery.tree.js"></script>
+    <link rel="stylesheet" type="text/css" href="src/css/jquery.tree.css"/>
+
+
+    <script type="text/javascript">
+        //<!--
+        $(document).ready(function() {
+           
+            $('.jquery').each(function() {
+                eval($(this).html());
+            });
+            $('.button').button();
+        });
+        //-->
+    </script>
+</head>
+<body>
+    
+
+        <h3><a href="#">All components in default behaviour</a></h3>
+        <div id="example-0">
+            <p>This example show all script basic features.</p>
+            <code class="jquery" lang="text/javascript">
+                $('#example-0 div').tree({
+                });
+            </code>
+            <div>
+                <ul>
+                    <li><input type="checkbox"><span>Node 1</span>
+                        <ul>
+                            <li><input type="checkbox"><span>Node 1.1</span>
+                                <ul>
+                                    <li><input type="checkbox"><span>Node 1.1.1</span>
+                                </ul>
+                        </ul>
+                        <ul>
+                            <li><input type="checkbox"><span>Node 1.2</span>
+                                <ul>
+                                    <li><input type="checkbox"><span>Node 1.2.1</span>
+                                    <li><input type="checkbox"><span>Node 1.2.2</span>
+                                    <li><input type="checkbox"><span>Node 1.2.3</span>
+                                        <ul>
+                                            <li><input type="checkbox"><span>Node 1.2.3.1</span>
+                                            <li><input type="checkbox"><span>Node 1.2.3.2</span>
+                                        </ul>
+                                    <li><input type="checkbox"><span>Node 1.2.4</span>
+                                    <li><input type="checkbox"><span>Node 1.2.5</span>
+                                    <li><input type="checkbox"><span>Node 1.2.6</span>
+                                </ul>
+                        </ul>
+                    <li><input type="checkbox"><span>Node 2</span>
+                        <ul>
+                            <li><input type="checkbox"><span>Node 2.1</span>
+                                <ul>
+                                    <li><input type="checkbox"><span>Node 2.1.1</span>
+                                </ul>
+                            <li><input type="checkbox"><span>Node 2.2</span>
+                                <ul>
+                                    <li><input type="checkbox"><span>Node 2.2.1</span>
+                                    <li><input type="checkbox"><span>Node 2.2.2</span>
+                                    <li><input type="checkbox"><span>Node 2.2.3</span>
+                                        <ul>
+                                            <li><input type="checkbox"><span>Node 2.2.3.1</span>
+                                            <li><input type="checkbox"><span>Node 2.2.3.2</span>
+                                        </ul>
+                                    <li><input type="checkbox"><span>Node 2.2.4</span>
+                                    <li><input type="checkbox"><span>Node 2.2.5</span>
+                                    <li><input type="checkbox"><span>Node 2.2.6</span>
+                                </ul>
+                        </ul>
+                </ul>
+            </div>
+        </div>
+
+
+        
+        
+
+        
+        
+
+</body>
+</html>

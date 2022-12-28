@@ -1,0 +1,50 @@
+                    <div class="separator"></div>
+                    <!-- /PAGE MAIN CONTENT -->
+                    
+                    
+                </div>
+            </div>
+
+            </div>
+		</div>
+	</section>
+	
+   
+    
+    <!--/PAGE -->
+	<!-- JAVASCRIPTS -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<!-- JQUERY -->
+	<script src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/jquery/jquery-2.0.3.min.js"></script>
+	<!-- JQUERY UI-->
+	<script src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
+	<!-- BOOTSTRAP -->
+	<script src="<?php echo site_url("assets/".ADMIN_DIR); ?>/bootstrap-dist/js/bootstrap.min.js"></script>
+	
+		
+	<!-- DATE RANGE PICKER -->
+	<script src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/bootstrap-daterangepicker/moment.min.js"></script>
+	
+	<script src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/bootstrap-daterangepicker/daterangepicker.min.js"></script>
+	<!-- SLIMSCROLL -->
+	<script type="text/javascript" src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/jQuery-slimScroll-1.3.0/jquery.slimscroll.min.js"></script>
+	<script type="text/javascript" src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/jQuery-slimScroll-1.3.0/slimScrollHorizontal.min.js"></script>
+	<!-- BLOCK UI -->
+	<script type="text/javascript" src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/jQuery-BlockUI/jquery.blockUI.min.js"></script>
+	<!-- SLIDENAV -->
+	<script type="text/javascript" src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/slidernav/slidernav.js"></script>
+	<!-- COOKIE -->
+	<script type="text/javascript" src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/jQuery-Cookie/jquery.cookie.min.js"></script>
+	<!-- CUSTOM SCRIPT -->
+	<script src="<?php echo site_url("assets/".ADMIN_DIR); ?>/js/script.js"></script>
+	<script>
+		jQuery(document).ready(function() {		
+			App.setPage("address_book");  //Set current page
+			App.init(); //Initialise plugins and elements
+		});
+	</script>
+	<!-- /JAVASCRIPTS -->
+
+	
+</body>
+</html>

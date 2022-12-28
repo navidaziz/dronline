@@ -1,0 +1,69 @@
+function script(){
+
+        $this->load->model("admin/location_address_model");
+		//countries 
+		$fields = $fields = array("countries.*");
+        $join_table = $join_table = array();
+        $where = "countries.status in (0, 1) ";
+		$countries = $this->country_model->joinGet($fields, "countries", $join_table, $where, FALSE, TRUE);
+		//var_dump($this->data["countries"][0]->country_id);
+		foreach($countries as $country_id => $countrie ){
+			$inputs["location_hierarchy_id"]  =  2;
+			$inputs["location_address_parent_id"]  =  1;
+			$inputs["location_address_title"]  =  $countrie->country_name;
+			$country_id = $this->location_address_model->save($inputs);
+
+            // Get provinces
+            $this->load->model("admin/province_model");
+			$fields = $fields = array("provinces.*");
+			$join_table = $join_table = array();
+			$where = "provinces.status in (0, 1) AND  `provinces`.`country_id` = $countrie->country_id";
+			$provinces = $this->province_model->joinGet($fields, "provinces", $join_table, $where, FALSE, TRUE);
+			foreach($provinces as $province_id => $province){
+				
+                    $inputs["location_hierarchy_id"]  =  3;
+                    $inputs["location_address_parent_id"]  =  $country_id;
+					$inputs["location_address_title"]  =  $province->province_name;
+					$province_id = $this->location_address_model->save($inputs);
+
+                     // Get Disstrict
+					 $this->load->model("admin/district_model");
+					 $fields = $fields = array("districts.*");
+					 $join_table = $join_table = array();
+					 $where = "`districts`.`province_id` = $province->province_id ";
+					 $districts = $this->district_model->joinGet($fields, "districts", $join_table, $where, FALSE, TRUE);
+					 var_dump($districts);
+					 foreach($districts as $district_id => $district  ){
+						 $inputs["location_hierarchy_id"]  =  5;
+						 $inputs["location_address_parent_id"]  =  $province_id;
+						 $inputs["location_address_title"]  =  $district->district_name;
+						 $district_id = $this->location_address_model->save($inputs);
+						 
+						 // Get tehsil
+						 $this->load->model("admin/tehsil_model");
+						 $fields = $fields = array("tehsils.*");
+						 $join_table = $join_table = array();
+						 $where = "`tehsils`.`district_id` = $district->district_id";
+						 $tehsils = $this->tehsil_model->joinGet($fields, "tehsils", $join_table, $where);
+						 foreach($tehsils as $tehsil_id => $tehsil) {
+							   $inputs["location_hierarchy_id"]  =  6;
+							   $inputs["location_address_parent_id"]  =  $district_id;
+							   $inputs["location_address_title"]  =  $tehsil->tehsil_name;
+							   $tehsil_id = $this->location_address_model->save($inputs);
+							    // Get Union Councils
+								$this->load->model("admin/unioncouncil_model");
+								$fields = $fields = array();
+								$join_table = $join_table = array();
+								$where = "`unioncouncils`.`tehsil_id` = $tehsil->tehsil_id ";
+								$unioncouncils = $this->unioncouncil_model->joinGet($fields, "unioncouncils", $join_table, $where);
+								foreach ($unioncouncils as $unioncouncil_id => $unioncouncil) {
+								   $inputs["location_hierarchy_id"]  =  7;
+								   $inputs["location_address_parent_id"]  =  $tehsil_id;
+								   $inputs["location_address_title"]  =  $unioncouncil->unioncouncil_name;
+								   $unioncouncil_id = $this->location_address_model->save($inputs);
+								   }
+								}
+							}
+						}
+					}
+				}       
