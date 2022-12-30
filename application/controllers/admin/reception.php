@@ -573,7 +573,8 @@ class Reception extends Admin_Controller
 		foreach ($test_values as $patient_test_id => $test_value) {
 			$query = "UPDATE `patient_tests` 
 				  SET `test_result`=" . $this->db->escape($test_value) . " 
-				  WHERE `patient_test_id`=" . $this->db->escape($patient_test_id) . "";
+				  WHERE `patient_test_id`=" . $this->db->escape($patient_test_id) . "
+				  AND invoice_id ='" . $invoice_id . "'";
 			$this->db->query($query);
 		}
 

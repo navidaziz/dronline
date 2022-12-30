@@ -37,7 +37,7 @@ class MY_Controller extends CI_Controller
         if (is_null($config)) {
             $config = array(
                 "upload_path" => "./assets/uploads/" . $this->router->fetch_class() . "/",
-                "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp",
+                "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4",
                 "max_size" => 10000,
                 "max_width" => 0,
                 "max_height" => 0,
@@ -103,7 +103,7 @@ class MY_Controller extends CI_Controller
         }
 
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $allowed = array('jpg', 'jpeg', 'bmp', 'png', 'gif', 'doc', 'docx', 'xlsx', 'xls', 'pdf', 'ppt', 'pptx');
+        $allowed = array('jpg', 'jpeg', 'bmp', 'png', 'gif', 'doc', 'docx', 'xlsx', 'xls', 'pdf', 'ppt', 'pptx', 'mp4');
 
         if (!in_array($ext, $allowed)) {
             $this->form_validation->set_message("_filetype_validation", "$ext file type is not allowed");

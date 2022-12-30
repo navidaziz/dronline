@@ -235,6 +235,10 @@
     <?php if ($invoice_detail->status == 3) { ?>
       <h4 class="alert alert-success">Case is completed</h4>
     <?php } ?>
+
+
+
+
   </div>
   <div class="col-md-3">
 
@@ -256,12 +260,20 @@
             ?>
               <div class="col-md-12">
                 <?php echo $count . ": File Name: " . $attachment->name . "<br />
-                File Detail: " . $attachment->detail . "<br />" ?>
-                <a href="javascript:view_image('<?php echo $attachment->id; ?>')">
-                  <input type="hidden" id="image_<?php echo $attachment->id; ?>" value="<?php echo $attachment->file ?>" />
-                  <input type="hidden" id="name_<?php echo $attachment->id; ?>" value="<?php echo $attachment->name ?>" />
-                  <input type="hidden" id="detail_<?php echo $attachment->id; ?>" value="<?php echo $attachment->detail ?>" />
+                File Detail: " . $attachment->detail . "<br />";
+                $ext = strtolower(pathinfo($attachment->file, PATHINFO_EXTENSION));
+                ?>
+                <?php $images = array('jpg', 'jpeg', 'bmp', 'gif', 'png');
+                if (in_array($ext, $images)) {
+                ?>
+                  <a href="javascript:view_image('<?php echo $attachment->id; ?>')">
+                    <input type="hidden" id="image_<?php echo $attachment->id; ?>" value="<?php echo $attachment->file ?>" />
+                    <input type="hidden" id="name_<?php echo $attachment->id; ?>" value="<?php echo $attachment->name ?>" />
+                    <input type="hidden" id="detail_<?php echo $attachment->id; ?>" value="<?php echo $attachment->detail ?>" />
+                    <?php echo file_type(base_url("assets/uploads/reception/" . $attachment->file), true); ?> </a>
+                <?php } else { ?>
                   <?php echo file_type(base_url("assets/uploads/reception/" . $attachment->file), true); ?> </a>
+                <?php } ?>
                 <br />
               </div>
             <?php
@@ -274,6 +286,220 @@
     </div>
   </div>
 </div>
+<h4 style="text-align: center;">Previous History</h4>
+
+<?php
+$query = "SELECT invoice_id, dr_prescriptions, remarks FROM invoices 
+       WHERE patient_id = '" . $invoice_detail->patient_id . "'
+      and invoice_id < '" . $invoice_id . "'
+      ORDER BY invoice_id DESC";
+$patient_invoices = $this->db->query($query)->result();
+if ($patient_invoices) {
+  foreach ($patient_invoices as $patient_invoice) { ?>
+    <div class="row">
+      <div class="col-md-3">
+        <div class="box border blue sticky-top" id="messenger">
+          <div class="box-title">
+            <h4><i class="fa fa-user"></i> Physician Prescriptions</h4>
+          </div>
+          <div class="box-body">
+            <strong></strong>
+            <p>
+              <?php echo $patient_invoice->dr_prescriptions; ?>
+            </p>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-md-6">
+        <div class="box border blue sticky-top" id="messenger">
+          <div class="box-title">
+            <h4><i class="fa fa-user"></i>History ID: <?php echo $patient_invoice->invoice_id; ?></h4>
+          </div>
+          <div class="box-body">
+            <page size='A4'>
+
+              <div>
+
+                <table style="width: 100%;" style="color:black">
+
+                  <tbody>
+                    <tr>
+                      <td>
+
+                        <?php
+                        $patient_tests_groups = "";
+                        $patient_test_ids = "";
+                        $query = "SELECT
+                      `test_groups`.`test_group_id`,
+                      `test_groups`.`test_group_name`
+                      , `test_groups`.`test_time` 
+                    FROM `test_groups`,
+                        `patient_tests` 
+                    WHERE `test_groups`.`test_group_id` = `patient_tests`.`test_group_id`
+                    AND `patient_tests`.`invoice_id` = '" . $patient_invoice->invoice_id . "'
+                    GROUP BY `test_groups`.`test_group_name`
+                    ORDER BY `patient_tests`.`patient_test_id` ASC;";
+
+                        $patient_tests_groups = $this->db->query($query)->result();
+                        foreach ($patient_tests_groups as $patient_tests_group) {
+                          $patient_test_ids .= $patient_tests_group->test_group_id . ", ";
+                          $where = "`patient_tests`.`invoice_id` = '" . $patient_invoice->invoice_id . "'
+			              AND `patient_tests`.`test_group_id` = '" . $patient_tests_group->test_group_id . "' ";
+                          $patient_tests_group->patient_tests = $this->patient_test_model->get_patient_test_list($where, false);
+                        }
+                        $patient_tests_groups = $patient_tests_groups;
+
+                        //var_dump($patient_tests_groups);
+
+                        $count = 1;
+                        foreach ($patient_tests_groups as $patient_tests_group) { ?>
+                          <h5 style="color:black;">
+                            <strong><?php echo $patient_tests_group->test_group_name; ?>
+                            </strong>
+                          </h5>
+                          <?php if ($patient_tests_group->test_group_id == 1) { ?>
+                            <div class="row">
+                              <?php foreach ($patient_tests_group->patient_tests as $patient_test) { ?>
+
+                                <div class="col-md-3" style="min-height: 150px !important;">
+                                  <strong><?php echo $patient_test->test_name; ?></strong>
+
+                                  <p style="border:1px dashed lightgray; padding:2px; border-radius:5px: ">
+                                    <?php echo $patient_test->test_result; ?>
+                                  </p>
+
+
+                                </div>
+                              <?php } ?>
+
+
+
+                            </div>
+                          <?php } else { ?>
+                            <table class="table table-bordered">
+                              <tr>
+                                <!-- <th >#</th> -->
+                                <th style="width: 200px;">TEST(s)</th>
+                                <th style="width: 200px;">RESULT(s)</th>
+                                <th style="width: 100px;">UNIT(s)</th>
+                                <th style="width: 300px;">NORMALS</th>
+                              </tr>
+
+
+                              <?php
+
+                              $normal_value = false;
+                              foreach ($patient_tests_group->patient_tests as $patient_test) {
+                                if ($patient_test->test_result != '') {
+                                  if (trim($patient_test->test_normal_value) != "") {
+                                    $normal_value = true;
+                                  }
+                                }
+                              }
+
+
+                              foreach ($patient_tests_group->patient_tests as $patient_test) { ?>
+                                <?php if ($patient_test->test_result != '') { ?>
+                                  <?php if ($count == 1) { ?>
+
+                                  <?php } ?>
+                                  <tr>
+                                    <th><?php echo $patient_test->test_name; ?></th>
+                                    <th> <?php echo $patient_test->test_result; ?> <?php echo $patient_test->result_suffix; ?></th>
+
+                                    <th style="text-align: center;"> <small> <?php echo $patient_test->unit; ?> </small></th>
+
+                                    <th style="width: 300px;">
+                                      <small><?php echo $patient_test->test_normal_value; ?></small>
+                                    </th>
+                                    <?php //if ($normal_value) { 
+                                    ?>
+
+
+                                    <?php //}  
+                                    ?>
+                                    <!-- <td><?php echo $patient_test->remarks; ?> </td> -->
+                                  </tr>
+                                <?php } ?>
+                              <?php } ?>
+                            </table>
+                          <?php } ?>
+
+                        <?php  } ?>
+
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <br />
+                        <strong>Remarks:</strong>
+                        <p>
+                          <?php echo $patient_invoice->remarks; ?>
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+
+                </table>
+              </div>
+
+            </page>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+
+        <div class="box border blue" id="messenger">
+          <div class="box-title">
+            <h4><i class="fa fa-user"></i>Attachments</h4>
+          </div>
+          <div class="box-body">
+            <h3>Attachements</h3>
+            <div class="row">
+              <?php
+              $query = "SELECT * FROM patient_attachments WHERE invoice_id = '" . $patient_invoice->invoice_id . "'";
+              $attachments = $this->db->query($query)->result();
+              $count = 1;
+              foreach ($attachments as $attachment) {
+              ?>
+                <div class="col-md-12">
+                  <?php echo $count . ": File Name: " . $attachment->name . "<br />
+                        File Detail: " . $attachment->detail . "<br />";
+                  $ext = strtolower(pathinfo($attachment->file, PATHINFO_EXTENSION));
+                  ?>
+                  <?php $images = array('jpg', 'jpeg', 'bmp', 'gif', 'png');
+                  if (in_array($ext, $images)) {
+                  ?>
+                    <a href="javascript:view_image('<?php echo $attachment->id; ?>')">
+                      <input type="hidden" id="image_<?php echo $attachment->id; ?>" value="<?php echo $attachment->file ?>" />
+                      <input type="hidden" id="name_<?php echo $attachment->id; ?>" value="<?php echo $attachment->name ?>" />
+                      <input type="hidden" id="detail_<?php echo $attachment->id; ?>" value="<?php echo $attachment->detail ?>" />
+                      <?php echo file_type(base_url("assets/uploads/reception/" . $attachment->file), true); ?> </a>
+                  <?php } else { ?>
+                    <?php echo file_type(base_url("assets/uploads/reception/" . $attachment->file), true); ?> </a>
+                  <?php } ?>
+                  <br />
+                </div>
+              <?php
+                $count++;
+              } ?>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <?php } ?>
+
+<?php
+} else { ?>
+  <p>History Not Found.</p>
+<?php } ?>
+
+
+
 
 <script>
   $('.test_value_input').keydown(function(e) {
