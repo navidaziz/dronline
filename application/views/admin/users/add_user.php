@@ -78,9 +78,6 @@
 
 
 
-
-
-
                 <div class="form-group">
 
                     <?php
@@ -110,6 +107,40 @@
 
 
                 </div>
+
+
+                <div class="form-group">
+
+                    <?php
+                    $label = array(
+                        "class" => "col-md-2 control-label",
+                        "style" => "",
+                    );
+                    echo form_label("Designation", "designatio", $label);      ?>
+
+                    <div class="col-md-10">
+                        <?php
+
+                        $text = array(
+                            "type"          =>  "text",
+                            "name"          =>  "designation",
+                            "id"            =>  "designation",
+                            "class"         =>  "form-control",
+                            "style"         =>  "", "required"      => "required",
+                            "title"         =>  "Designation",
+                            "value"         =>  set_value("designation"),
+                            "placeholder"   =>  "Designation",
+                        );
+                        echo  form_input($text);
+                        ?>
+                        <?php echo form_error("designation", "<p class=\"text-danger\">", "</p>"); ?>
+                    </div>
+
+
+
+                </div>
+
+
 
                 <div class="form-group">
 

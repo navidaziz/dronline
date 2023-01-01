@@ -104,9 +104,35 @@
       <table style="width: 100%;" style="color:black">
         <thead>
           <tr>
-            <th style="text-align: center;" colspan="2">
-              <h4><?php echo $system_global_settings[0]->system_title ?></h4>
-              <small><?php echo $system_global_settings[0]->system_sub_title ?> - Phone No. 0000-000000</small>
+            <th style="">
+
+              <?php
+
+              $query = "SELECT `opd_doctor` FROM `invoices` 
+                        WHERE `invoice_id`= '" . $invoice_detail->invoice_id . "' ";
+              $opd_doctor = $this->db->query($query)->row()->opd_doctor;
+
+              $query = "SELECT
+                                `roles`.`role_title`,
+                                `users`.`user_title` ,
+                                `users`.`designation` ,
+                                `users`.`user_mobile_number`
+                            FROM `roles`,
+                            `users` 
+                            WHERE `roles`.`role_id` = `users`.`role_id`
+                            AND `users`.`test_group_ids`='" . $opd_doctor . "'";
+              $opd_doctor = $this->db->query($query)->row();
+              ?>
+              <h3><?php echo $opd_doctor->user_title ?></h3>
+              <h4><?php echo $opd_doctor->designation ?></h4>
+              <h4>Contact No: <?php echo $opd_doctor->user_mobile_number ?></h4>
+            </th>
+            <th style="text-align: right;">
+
+              <h3><?php echo $system_global_settings[0]->system_title ?></h3>
+              <h4><?php echo $system_global_settings[0]->system_sub_title ?></h4>
+              <h4>Contact No: 0000-000000</h4>
+
             </th>
           </tr>
           <tr>
@@ -215,26 +241,18 @@
               <div style="margin-left: 10px;">
 
                 <h4>Physician Prescriptions:</h4>
-                <p><?php echo $invoice_detail->dr_prescriptions; ?></p>
+                <p><?php echo @$invoice_detail->dr_prescriptions; ?></p>
                 <p style="text-align: right;">
 
-                  <?php
 
-                  $query = "SELECT `test_report_by` FROM `invoices` WHERE `invoice_id`= '" . $invoice_detail->invoice_id . "' ";
-                  $lab_technician_id = $this->db->query($query)->result()[0]->test_report_by;
-
-                  $query = "SELECT
-                                `roles`.`role_title`,
-                                `users`.`user_title`  
-                            FROM `roles`,
-                            `users` 
-                            WHERE `roles`.`role_id` = `users`.`role_id`
-                            AND `users`.`user_id`='" . $lab_technician_id . "'";
-                  $user_data = $this->db->query($query)->result()[0];
-                  ?>
                   <br />
                   <br />
-                  Prescribed By: <strong> <?php echo $user_data->user_title; ?></strong>
+                <p style="text-align: right;">
+                  Prescribed By: <br />
+                  <strong><?php echo $opd_doctor->user_title ?></strong><br />
+                  <?php echo $opd_doctor->designation ?>
+
+                </p>
                 </p>
 
               </div>

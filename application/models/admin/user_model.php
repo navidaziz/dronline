@@ -97,6 +97,8 @@ class User_model extends MY_Model
         $inputs["user_password"]  =  $this->input->post("user_password");
 
         $inputs["restaurant_id"]  =  $this->input->post("restaurant_id");
+        $inputs["designation"]  =  $this->input->post("restaurant_id");
+
 
         $inputs["rider_id"]  =  $this->input->post("rider_id");
 
@@ -124,6 +126,8 @@ class User_model extends MY_Model
         $inputs["user_password"]  =  $this->input->post("user_password");
 
         $inputs["restaurant_id"]  =  $this->input->post("restaurant_id");
+        $inputs["designation"]  =  $this->input->post("designation");
+
 
         $inputs["rider_id"]  =  $this->input->post("rider_id");
 
