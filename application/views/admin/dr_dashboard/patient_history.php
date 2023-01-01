@@ -215,6 +215,26 @@
         </page>
       </div>
     </div>
+    <script src="//cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
+    <div class="row">
+      <div class="col-md-6">
+        <ul style="list-style: none;">
+          <?php $query = "SELECT * FROM medicines";
+          $medicines = $this->db->query($query)->result();
+          foreach ($medicines as $medicine) { ?>
+            <li style="cursor: pointer;" onclick="add_medicine('<?php echo $medicine->medicine_id; ?>')"><strong><?php echo $medicine->medicine_name; ?></strong>
+              <small><?php echo $medicine->medicine_detail; ?></small>
+              <?php $value = "<p><strong>" . $medicine->medicine_name . "</strong> ( " . $medicine->medicine_detail . " )</p><br />"; ?>
+              <input id="medicine_<?php echo $medicine->medicine_id; ?>" type="hidden" value="<?php echo $value; ?>" />
+              <span style="margin-left:10px ;"></span>
+            </li>
+          <?php } ?>
+        </ul>
+      </div>
+      <div class="col-md-6">
+      </div>
+    </div>
+
     <strong>Physician Prescriptions:</strong>
     <form onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/add_prescriptions/" . $invoice_id); ?>" method="post">
       <table class="table">
@@ -230,7 +250,17 @@
         </tbody>
       </table>
     </form>
+    <script>
+      CKEDITOR.replace('dr_prescriptions');
+      CKEDITOR.config.height = 300;
 
+      function add_medicine(id) {
+
+        value = $('#medicine_' + id).val();
+        CKEDITOR.instances['dr_prescriptions'].insertHtml(value);
+
+      }
+    </script>
 
     <?php if ($invoice_detail->status == 3) { ?>
       <h4 class="alert alert-success">Case is completed</h4>

@@ -31,13 +31,21 @@ class Dr_dashboard extends Admin_Controller
 		// $this->data["test_groups"] = $this->test_group_model->get_test_group_list($where, false);
 		// $this->data["test_categories"] = $this->test_type_model->getList("test_categories", "test_category_id", "test_category", $where = "`test_categories`.`status` IN (1) ");
 		$user_id = $this->session->userdata('user_id');
+		$query = "SELECT test_group_ids FROM users WHERE user_id ='" . $user_id . "'";
+		$dr_opd = $this->db->query($query)->row()->test_group_ids;
 
 
-		$where = "`invoices`.`status` IN (2) AND DATE(`invoices`.`created_date`) = DATE(NOW())  
+		// $where = "`invoices`.`status` IN (2) AND DATE(`invoices`.`created_date`) = DATE(NOW())  
+		// ORDER BY `invoices`.`invoice_id` ASC";
+		$where = "`invoices`.`status` IN (2) 
+		AND opd_doctor = '" . $dr_opd . "' 
 		ORDER BY `invoices`.`invoice_id` ASC";
 		$this->data["new_appointments"] = $this->invoice_model->get_invoice_list($where, false);
 
-		$where = "`invoices`.`status` IN (3) AND DATE(`invoices`.`created_date`) = DATE(NOW())  
+		// $where = "`invoices`.`status` IN (3) AND DATE(`invoices`.`created_date`) = DATE(NOW())  
+		// ORDER BY `invoices`.`invoice_id` ASC";
+		$where = "`invoices`.`status` IN (3) 
+		AND opd_doctor = '" . $dr_opd . "'  
 		ORDER BY `invoices`.`invoice_id` ASC";
 		$this->data["completed_appointments"] = $this->invoice_model->get_invoice_list($where, false);
 		$this->data["view"] = ADMIN_DIR . "dr_dashboard/dashboard";

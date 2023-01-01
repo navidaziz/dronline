@@ -458,7 +458,13 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
               text-decoration: line-through;
             <?php }  ?>
             ">
-              <td><?php echo $count++; ?> </td>
+              <td>
+                <?php if ($test->is_deleted != 1) { ?>
+                  <a onclick="return confirm('Do you really want to cancal?');" href="<?php echo site_url(ADMIN_DIR . "lab/delete_invoice/$test->invoice_id") ?>" class="pull-right"><i class="fa fa-times" style="color:red"></i></a>
+                <?php } ?>
+
+                <?php echo $count++; ?>
+              </td>
               <td><?php echo $test->invoice_id; ?> </td>
               <td><?php
                   if ($test->category_id != 5) {
@@ -486,7 +492,10 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
                   Completed
                 <?php } ?>
               </td>
-              <td><a href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a></td>
+              <td><a href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a>
+
+
+              </td>
               <td>
                 <?php if ($test->status == 3) { ?>
                   <a style="margin-left: 10px;" target="new" href="<?php echo site_url(ADMIN_DIR . "reception/print_patient_report/$test->invoice_id") ?>"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>

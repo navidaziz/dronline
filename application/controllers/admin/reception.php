@@ -47,7 +47,8 @@ class Reception extends Admin_Controller
 		$this->data["test_categories"] = $this->test_type_model->getList("test_categories", "test_category_id", "test_category", $where = "`test_categories`.`status` IN (1) ");
 
 
-		$where = "`invoices`.`status` IN (1,2,3) AND DATE(`invoices`.`created_date`) = DATE(NOW())  ORDER BY `invoices`.`invoice_id` DESC";
+		//$where = "`invoices`.`status` IN (1,2,3) AND DATE(`invoices`.`created_date`) = DATE(NOW())  ORDER BY `invoices`.`invoice_id` DESC";
+		$where = "`invoices`.`status` IN (1,2,3)   ORDER BY `invoices`.`invoice_id` DESC";
 		$this->data["all_tests"] = $this->invoice_model->get_invoice_list($where, false);
 		$this->load->view(ADMIN_DIR . "reception/home2", $this->data);
 	}
@@ -63,10 +64,11 @@ class Reception extends Admin_Controller
 		$this->data["test_categories"] = $this->test_type_model->getList("test_categories", "test_category_id", "test_category", $where = "`test_categories`.`status` IN (1) ");
 		$user_id = $this->session->userdata("user_id");
 
-		$where = "`invoices`.`status` IN (1,2,3) 
-		           AND DATE(`invoices`.`created_date`) = DATE(NOW()) 
-				   AND `invoices`.`created_by` = " . $user_id . " 
-				   ORDER BY `invoices`.`invoice_id` DESC";
+		// $where = "`invoices`.`status` IN (1,2,3) 
+		//            AND DATE(`invoices`.`created_date`) = DATE(NOW()) 
+		// 		   AND `invoices`.`created_by` = " . $user_id . " 
+		// 		   ORDER BY `invoices`.`invoice_id` DESC";
+		$where = "`invoices`.`status` IN (1,2,3)   ORDER BY `invoices`.`invoice_id` DESC";
 		$this->data["all_tests"] = $this->invoice_model->get_invoice_list($where, false);
 		$this->load->view(ADMIN_DIR . "reception/home", $this->data);
 	}
@@ -662,5 +664,28 @@ class Reception extends Admin_Controller
 	{
 		$invoice_id = (int) $invoice_id;
 		$this->load->view(ADMIN_DIR . "dr_dashboard/print_patient_report", $this->patient_test_data($invoice_id));
+	}
+
+
+	public function delete_invoice($invoice_id)
+	{
+		$invoice_id = (int)  $invoice_id;
+		// if ($this->db->query("DELETE FROM `invoices` WHERE `invoice_id` = '" . $invoice_id . "' AND `status` IN(1,2)")) {
+		// 	$this->db->query("DELETE FROM `invoice_test_groups` WHERE `invoice_id` = '" . $invoice_id . "'");
+		// 	redirect(ADMIN_DIR . "reception");
+		// }
+
+		$query = "UPDATE invoices
+			          SET is_deleted=1, 
+					  cancel_reason='Fault Entry',  
+					  cancel_reason_detail='Deleted By Reception' 
+					  WHERE invoice_id= $invoice_id";
+		if ($this->db->query($query)) {
+			$this->session->set_flashdata("msg_success", "Receipt Cancelled Successfully.");
+			redirect(ADMIN_DIR . "reception");
+		} else {
+			$this->session->set_flashdata("msg_error", "DB Error try again.");
+			redirect(ADMIN_DIR . "reception");
+		}
 	}
 }
