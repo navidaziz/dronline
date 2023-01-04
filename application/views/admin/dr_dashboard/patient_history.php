@@ -47,6 +47,14 @@
         $query = "SELECT user_title FROM users WHERE user_id = '" . $created_by . "'";
         echo  $user_title = $this->db->query($query)->row()->user_title;
         ?>
+        <?php
+        $query = "SELECT COUNT(*) as total FROM invoices WHERE patient_id = '" . $invoice_detail->patient_id . "'";
+        $total_appointments = $this->db->query($query)->row()->total;
+        if ($total_appointments == 1) { ?>
+          <h3 style="text-align: center;"><strong>Visit Type: </strong> Initial Visit</h3>
+        <?php } else { ?>
+          <h3 style="text-align: center;"><strong>Visit Type: </strong> Followup</h3>
+        <?php } ?>
 
         <h4 style="font-weight: bold !important; text-align:center;border: 1px dashed gray; padding:5px; border-radius:5px">
           <?php
@@ -125,34 +133,32 @@
                         <strong><?php echo $patient_tests_group->test_group_name; ?>
                         </strong>
                       </h5>
-                      <?php if ($patient_tests_group->test_group_id == 1) { ?>
-                        <div class="row">
+                      <table class="table">
+                        <?php if ($patient_tests_group->test_group_id == 1) { ?>
+
                           <?php foreach ($patient_tests_group->patient_tests as $patient_test) { ?>
-
-                            <div class="col-md-3" style="min-height: 150px !important;">
-                              <strong><?php echo $patient_test->test_name; ?></strong>
-
-                              <p style="border:1px dashed lightgray; padding:2px; border-radius:5px: "><?php echo $patient_test->test_result; ?></p>
-
-
-                            </div>
+                            <tr>
+                              <th style="width: 200px;"><?php echo $patient_test->test_name; ?></th>
+                              <td>
+                                <?php echo $patient_test->test_result; ?>
+                                <?php echo $patient_test->result_suffix; ?>
+                                <small> <?php echo $patient_test->unit; ?> </small>
+                              </td>
+                            </tr>
                           <?php } ?>
+                      </table>
+                    <?php } else { ?>
+                      <table class="table table-bordered">
+                        <tr>
+                          <!-- <th >#</th> -->
+                          <th style="width: 200px;">TEST(s)</th>
+                          <th style="width: 200px;">RESULT(s)</th>
+                          <th style="width: 100px;">UNIT(s)</th>
+                          <th style="width: 300px;">NORMALS</th>
+                        </tr>
 
 
-
-                        </div>
-                      <?php } else { ?>
-                        <table class="table table-bordered">
-                          <tr>
-                            <!-- <th >#</th> -->
-                            <th style="width: 200px;">TEST(s)</th>
-                            <th style="width: 200px;">RESULT(s)</th>
-                            <th style="width: 100px;">UNIT(s)</th>
-                            <th style="width: 300px;">NORMALS</th>
-                          </tr>
-
-
-                          <?php
+                        <?php
 
                           $normal_value = false;
                           foreach ($patient_tests_group->patient_tests as $patient_test) {
@@ -165,33 +171,33 @@
 
 
                           foreach ($patient_tests_group->patient_tests as $patient_test) { ?>
-                            <?php if ($patient_test->test_result != '') { ?>
-                              <?php if ($count == 1) { ?>
+                          <?php if ($patient_test->test_result != '') { ?>
+                            <?php if ($count == 1) { ?>
 
-                              <?php } ?>
-                              <tr>
-                                <th><?php echo $patient_test->test_name; ?></th>
-                                <th> <?php echo $patient_test->test_result; ?> <?php echo $patient_test->result_suffix; ?></th>
-
-                                <th style="text-align: center;"> <small> <?php echo $patient_test->unit; ?> </small></th>
-
-                                <th style="width: 300px;">
-                                  <small><?php echo $patient_test->test_normal_value; ?></small>
-                                </th>
-                                <?php //if ($normal_value) { 
-                                ?>
-
-
-                                <?php //}  
-                                ?>
-                                <!-- <td><?php echo $patient_test->remarks; ?> </td> -->
-                              </tr>
                             <?php } ?>
-                          <?php } ?>
-                        </table>
-                      <?php } ?>
+                            <tr>
+                              <th><?php echo $patient_test->test_name; ?></th>
+                              <th> <?php echo $patient_test->test_result; ?> <?php echo $patient_test->result_suffix; ?></th>
 
-                    <?php  } ?>
+                              <th style="text-align: center;"> <small> <?php echo $patient_test->unit; ?> </small></th>
+
+                              <th style="width: 300px;">
+                                <small><?php echo $patient_test->test_normal_value; ?></small>
+                              </th>
+                              <?php //if ($normal_value) { 
+                              ?>
+
+
+                              <?php //}  
+                              ?>
+                              <!-- <td><?php echo $patient_test->remarks; ?> </td> -->
+                            </tr>
+                          <?php } ?>
+                        <?php } ?>
+                      </table>
+                    <?php } ?>
+
+                  <?php  } ?>
 
                   </td>
                 </tr>

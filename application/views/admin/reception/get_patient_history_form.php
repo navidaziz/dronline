@@ -52,6 +52,17 @@
           echo  $user_title = $this->db->query($query)->row()->user_title;
           ?>
         </strong>
+
+
+        <?php
+        $query = "SELECT COUNT(*) as total FROM invoices WHERE patient_id = '" . $invoice_detail->patient_id . "'";
+        $total_appointments = $this->db->query($query)->row()->total;
+        if ($total_appointments == 1) { ?>
+          <h3 style="text-align: center;"><strong>Visit Type: </strong> Initial Visit</h3>
+        <?php } else { ?>
+          <h3 style="text-align: center;"><strong>Visit Type: </strong> Followup</h3>
+        <?php } ?>
+
         <h4 style="font-weight: bold !important; text-align:center;border: 1px dashed gray; padding:5px; border-radius:5px">
           <?php
           if ($invoice_detail->category_id != 5) {
@@ -189,17 +200,19 @@
                   <form action="<?php echo site_url(ADMIN_DIR . "reception/update_test_data/" . $invoice_id); ?>" method="post">
                     <h4><?php echo $patient_tests_group->test_group_name; ?>
                     </h4>
-                    <div class="row">
+                    <table class="table table-bordered" style="text-align: left; font-size:12px">
+
                       <?php
                       $count = 1;
                       foreach ($patient_tests_group->patient_tests as $patient_test) { ?>
-                        <div class="col-md-3">
-                          <strong><?php echo $patient_test->test_name; ?></strong>
-
-                          <textarea class="test_valu e_input" style="width: 100%;" onkeyup="update_test_value('<?php echo $patient_test->patient_test_id; ?>')" type="text" id="test_<?php echo $patient_test->patient_test_id; ?>_value" name="test_values[<?php echo $patient_test->patient_test_id; ?>]" rows="5"><?php echo $patient_test->test_result; ?></textarea>
-                        </div>
+                        <tr>
+                          <th style="width: 200px;"><?php echo $patient_test->test_name; ?></th>
+                          <td>
+                            <textarea class="test_valu e_input" style="width: 100%;" onkeyup="update_test_value('<?php echo $patient_test->patient_test_id; ?>')" type="text" id="test_<?php echo $patient_test->patient_test_id; ?>_value" name="test_values[<?php echo $patient_test->patient_test_id; ?>]" rows="2"><?php echo $patient_test->test_result; ?></textarea>
+                          </td>
+                        </tr>
                       <?php } ?>
-                    </div>
+                    </table>
                     <p style="text-align: center; padding:5px">
                       <input class="btn btn-primary btn-small" type="submit" name="Update <?php echo $patient_tests_group->test_group_name; ?> Data" value="Update <?php echo $patient_tests_group->test_group_name; ?> Data" />
                     </p>
