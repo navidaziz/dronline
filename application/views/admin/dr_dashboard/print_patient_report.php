@@ -108,9 +108,9 @@
 
               <?php
 
-              $query = "SELECT `opd_doctor` FROM `invoices` 
+              $query = "SELECT `reported_by` FROM `invoices` 
                         WHERE `invoice_id`= '" . $invoice_detail->invoice_id . "' ";
-              $opd_doctor = $this->db->query($query)->row()->opd_doctor;
+              $reported_by = $this->db->query($query)->row()->reported_by;
 
               $query = "SELECT
                                 `roles`.`role_title`,
@@ -120,7 +120,7 @@
                             FROM `roles`,
                             `users` 
                             WHERE `roles`.`role_id` = `users`.`role_id`
-                            AND `users`.`test_group_ids`='" . $opd_doctor . "'";
+                            AND `users`.`user_id`='" . $reported_by . "'";
               $opd_doctor = $this->db->query($query)->row();
               ?>
               <h3><?php echo $opd_doctor->user_title ?></h3>
