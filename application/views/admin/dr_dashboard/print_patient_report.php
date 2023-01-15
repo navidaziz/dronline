@@ -104,34 +104,11 @@
       <table style="width: 100%;" style="color:black">
         <thead>
           <tr>
-            <th style="">
+            <th colspan="2" style="text-align:center">
 
-              <?php
-
-              $query = "SELECT `opd_doctor` FROM `invoices` 
-                        WHERE `invoice_id`= '" . $invoice_detail->invoice_id . "' ";
-              $opd_doctor = $this->db->query($query)->row()->opd_doctor;
-
-              $query = "SELECT
-                                `roles`.`role_title`,
-                                `users`.`user_title` ,
-                                `users`.`designation` ,
-                                `users`.`user_mobile_number`
-                            FROM `roles`,
-                            `users` 
-                            WHERE `roles`.`role_id` = `users`.`role_id`
-                            AND `users`.`test_group_ids`='" . $opd_doctor . "'";
-              $opd_doctor = $this->db->query($query)->row();
-              ?>
-              <h3><?php echo $opd_doctor->user_title ?></h3>
-              <h4><?php echo $opd_doctor->designation ?></h4>
-              <h4>Contact No: <?php echo $opd_doctor->user_mobile_number ?></h4>
-            </th>
-            <th style="text-align: right;">
 
               <h3><?php echo $system_global_settings[0]->system_title ?></h3>
               <h4><?php echo $system_global_settings[0]->system_sub_title ?></h4>
-              <h4>Contact No: 0000-000000</h4>
 
             </th>
           </tr>
@@ -224,7 +201,8 @@
         </thead>
         <tbody>
           <tr>
-            <td style="width: 250px; vertical-align: top;">
+            <td style="width: 43%; vertical-align: top;">
+
               <h4>Patient History</h4>
 
               <?php
@@ -236,6 +214,17 @@
                 <p style="color: black; padding:2px;"><?php echo $patient_history->test_result; ?></p>
 
               <?php } ?>
+
+              <?php if ($invoice_detail->remarks) { ?>
+                <div style="text-align: left; color:black"><strong>Other Detail:</strong>
+                  <p style="border: 1px dashed #ddd; border-radius: 5px; padding: 5px; margin:5px">
+                    <?php echo $invoice_detail->remarks; ?>
+                  </p>
+                </div>
+              <?php } ?>
+              <br />
+
+
             </td>
             <td style="border-left: 1px solid gray; padding-left:5px; vertical-align:top; ">
               <div style="margin-left: 10px;">
@@ -248,19 +237,31 @@
                   <br />
                   <br />
                 <p style="text-align: right;">
-                  Prescribed By: <br />
-                  <strong><?php echo $opd_doctor->user_title ?></strong><br />
-                  <?php echo $opd_doctor->designation ?>
+                  <?php
 
-                </p>
+                  $query = "SELECT `test_report_by` FROM `invoices` 
+                        WHERE `invoice_id`= '" . $invoice_detail->invoice_id . "' ";
+                  if ($this->db->query($query)->row()) {
+                    $test_report_by = $this->db->query($query)->row()->test_report_by;
+
+                    $query = "SELECT
+                                `roles`.`role_title`,
+                                `users`.`user_title` ,
+                                `users`.`designation` ,
+                                `users`.`user_mobile_number`
+                            FROM `roles`,
+                            `users` 
+                            WHERE `roles`.`role_id` = `users`.`role_id`
+                            AND `users`.`user_id`='" . $test_report_by . "'";
+                    $opd_doctor = $this->db->query($query)->row();
+                  ?>
+                    Prescribed By: <br />
+                    <strong><?php echo $opd_doctor->user_title ?></strong><br />
+                    <?php echo $opd_doctor->designation ?>
+                  <?php } ?>
                 </p>
 
               </div>
-              <br />
-              <br />
-              <br />
-              <br />
-              <br />
               <br />
 
 
@@ -326,13 +327,7 @@
           <tr>
             <td colspan="2">
               <br />
-              <?php if ($invoice_detail->remarks) { ?>
-                <div style="text-align: left; color:black"><strong>Other Detail:</strong>
-                  <p style="border: 1px dashed #ddd; border-radius: 5px; padding: 5px;">
-                    <?php echo $invoice_detail->remarks; ?>
-                  </p>
-                </div>
-              <?php } ?>
+
             </td>
           </tr>
         </tbody>
