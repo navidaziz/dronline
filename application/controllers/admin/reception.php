@@ -68,8 +68,20 @@ class Reception extends Admin_Controller
 		//            AND DATE(`invoices`.`created_date`) = DATE(NOW()) 
 		// 		   AND `invoices`.`created_by` = " . $user_id . " 
 		// 		   ORDER BY `invoices`.`invoice_id` DESC";
-		$where = "`invoices`.`status` IN (1,2,3)   ORDER BY `invoices`.`invoice_id` DESC";
-		$this->data["all_tests"] = $this->invoice_model->get_invoice_list($where, false);
+		$where = "`invoices`.`status` IN (1)   ORDER BY `invoices`.`invoice_id` DESC";
+		$this->data["new"] = $this->invoice_model->get_invoice_list($where, false);
+
+		$where = "`invoices`.`status` IN (2)   ORDER BY `invoices`.`invoice_id` DESC";
+		$this->data["inprogress"] = $this->invoice_model->get_invoice_list($where, false);
+
+
+		$where = "`invoices`.`status` IN (3)   ORDER BY `invoices`.`invoice_id` DESC";
+		$this->data["completed"] = $this->invoice_model->get_invoice_list($where, false);
+
+
+		// $where = "`invoices`.`status` IN (1,2,3)   ORDER BY `invoices`.`invoice_id` DESC";
+		// $this->data["all_tests"] = $this->invoice_model->get_invoice_list($where, false);
+
 		$this->load->view(ADMIN_DIR . "reception/home", $this->data);
 	}
 

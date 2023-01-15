@@ -356,10 +356,10 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
   <div class="col-md-9">
     <div class="box border blue" id="messenger">
       <div class="box-title">
-        <h4><i class="fa fa-file"></i> Today Online Appointments List and Reports </h4>
+        <h4><i class="fa fa-file"></i>Online Appointments List and Reports </h4>
       </div>
       <div class="box-body" style="font-size: 12px !important;">
-        <div style="border-radius: 5px; border: 1px solid gray; padding:5px; margin-bottom: 5px;">
+        <!-- <div style="border-radius: 5px; border: 1px solid gray; padding:5px; margin-bottom: 5px;">
           <?php $user_id = $this->session->userdata("user_id");
           $query = "SELECT google_meet_link, google_meet_link_date_time FROM users WHERE user_id = '" . $user_id . "'";
           $video_link_detail = $this->db->query($query)->row();
@@ -382,7 +382,7 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
           </table>
 
           <div id="search_result"></div>
-        </div>
+        </div> -->
         <script>
           function get_today_progress_report() {
             $.ajax({
@@ -419,27 +419,26 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
             }
           }
         </script>
-
-
-        <table class="table table-bordered" id="receipts_table">
+        <h4>New</h4>
+        <table class="table table-bordered" id="receipt s_table">
           <thead>
             <tr>
               <th>#</th>
-              <th>History No</th>
-              <th>Appointment No</th>
+              <!-- <th>History No</th> -->
               <th>Patient ID</th>
               <th>Patient Name</th>
               <th>Contact No</th>
               <th>Gender</th>
+              <th>Appointment No</th>
               <th>Token</th>
               <th>Status</th>
               <th>Action</th>
-              <th>Dr. Report</th>
+              <th>Date</th>
             </tr>
           </thead>
           <?php
           $count = 1;
-          foreach ($all_tests as $test) {
+          foreach ($new as $test) {
             $color = '';
             if ($test->status == 1) {
               $color = "#E9F1FC";
@@ -465,7 +464,12 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
 
                 <?php echo $count++; ?>
               </td>
-              <td><?php echo $test->invoice_id; ?> </td>
+              <!-- <td><?php echo $test->invoice_id; ?> </td> -->
+
+              <td><?php echo $test->patient_id; ?></td>
+              <td><a href="#" onclick="update_patient_detail('<?php echo $test->patient_id; ?>')"><?php echo $test->patient_name; ?></a></td>
+              <td><?php echo $test->patient_mobile_no; ?></td>
+              <td><?php echo $test->patient_gender; ?></td>
               <td><?php
                   if ($test->category_id != 5) {
                     echo $test_categories[$test->category_id] . "-" . $test->today_count;
@@ -475,10 +479,171 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
                     echo $opd_doctor . "-" . $test->today_count;
                   } ?>
               </td>
+              <td><a target="new" href="<?php echo site_url(ADMIN_DIR . "reception/print_token/" . $test->invoice_id); ?>"><i class="fa fa-print"></i> Print</a></td>
+
+              <td>
+                <?php if ($test->status == 1) { ?>
+                  New
+                <?php } ?>
+                <?php if ($test->status == 2) { ?>
+                  Inprogress
+                <?php } ?>
+                <?php if ($test->status == 3) { ?>
+                  Completed
+                <?php } ?>
+              </td>
+              <td><a href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a>
+
+
+              </td>
+              <td>
+                <?php echo date('d M, Y', strtotime($test->created_date)); ?>
+              </td>
+            </tr>
+          <?php } ?>
+        </table>
+
+        <h4>Inprogress</h4>
+        <table class="table table-bordered" id="receipt s_table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <!-- <th>History No</th> -->
+              <th>Patient ID</th>
+              <th>Patient Name</th>
+              <th>Contact No</th>
+              <th>Gender</th>
+              <th>Appointment No</th>
+              <th>Token</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <?php
+          $count = 1;
+          foreach ($inprogress as $test) {
+            $color = '';
+            if ($test->status == 1) {
+              $color = "#E9F1FC";
+            }
+            if ($test->status == 2) {
+              $color = "#ffe8e7";
+            }
+            if ($test->status == 3) {
+              $color = "#F0FFF0";
+            }
+
+          ?>
+            <tr style="background-color: <?php echo $color; ?>;
+            
+            <?php if ($test->is_deleted == 1) { ?>
+              text-decoration: line-through;
+            <?php }  ?>
+            ">
+              <td>
+                <?php if ($test->is_deleted != 1) { ?>
+                  <a onclick="return confirm('Do you really want to cancal?');" href="<?php echo site_url(ADMIN_DIR . "lab/delete_invoice/$test->invoice_id") ?>" class="pull-right"><i class="fa fa-times" style="color:red"></i></a>
+                <?php } ?>
+
+                <?php echo $count++; ?>
+              </td>
+              <!-- <td><?php echo $test->invoice_id; ?> </td> -->
+
               <td><?php echo $test->patient_id; ?></td>
               <td><a href="#" onclick="update_patient_detail('<?php echo $test->patient_id; ?>')"><?php echo $test->patient_name; ?></a></td>
               <td><?php echo $test->patient_mobile_no; ?></td>
               <td><?php echo $test->patient_gender; ?></td>
+              <td><?php
+                  if ($test->category_id != 5) {
+                    echo $test_categories[$test->category_id] . "-" . $test->today_count;
+                  } else {
+                    $query = "SELECT test_group_name FROM test_groups WHERE test_group_id = '" . $test->opd_doctor . "'";
+                    $opd_doctor = $this->db->query($query)->result()[0]->test_group_name;
+                    echo $opd_doctor . "-" . $test->today_count;
+                  } ?>
+              </td>
+              <td><a target="new" href="<?php echo site_url(ADMIN_DIR . "reception/print_token/" . $test->invoice_id); ?>"><i class="fa fa-print"></i> Print</a></td>
+
+              <td>
+                <?php if ($test->status == 1) { ?>
+                  New
+                <?php } ?>
+                <?php if ($test->status == 2) { ?>
+                  Inprogress
+                <?php } ?>
+                <?php if ($test->status == 3) { ?>
+                  Completed
+                <?php } ?>
+              </td>
+              <td><a href="<?php echo site_url(ADMIN_DIR . "reception/add_patient_history/" . $test->invoice_id); ?>">Add Patient History</a>
+
+
+              </td>
+              <td>
+                <?php echo date('d M, Y', strtotime($test->created_date)); ?>
+              </td>
+            </tr>
+          <?php } ?>
+        </table>
+
+        <h4>Completed</h4>
+        <table class="table table-bordered" id="receipts_table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <!-- <th>History No</th> -->
+              <th>Patient ID</th>
+              <th>Patient Name</th>
+              <th>Contact No</th>
+              <th>Gender</th>
+              <th>Appointment No</th>
+              <th>Token</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Dr. Report</th>
+            </tr>
+          </thead>
+          <?php
+          $count = 1;
+          foreach ($completed as $test) {
+            $color = '';
+            if ($test->status == 1) {
+              $color = "#E9F1FC";
+            }
+            if ($test->status == 2) {
+              $color = "#ffe8e7";
+            }
+            if ($test->status == 3) {
+              $color = "#F0FFF0";
+            }
+
+          ?>
+            <tr style="background-color: <?php echo $color; ?>;
+            
+            <?php if ($test->is_deleted == 1) { ?>
+              text-decoration: line-through;
+            <?php }  ?>
+            ">
+              <td>
+
+                <?php echo $count++; ?>
+              </td>
+              <!-- <td><?php echo $test->invoice_id; ?> </td> -->
+
+              <td><?php echo $test->patient_id; ?></td>
+              <td><a href="#" onclick="update_patient_detail('<?php echo $test->patient_id; ?>')"><?php echo $test->patient_name; ?></a></td>
+              <td><?php echo $test->patient_mobile_no; ?></td>
+              <td><?php echo $test->patient_gender; ?></td>
+              <td><?php
+                  if ($test->category_id != 5) {
+                    echo $test_categories[$test->category_id] . "-" . $test->today_count;
+                  } else {
+                    $query = "SELECT test_group_name FROM test_groups WHERE test_group_id = '" . $test->opd_doctor . "'";
+                    $opd_doctor = $this->db->query($query)->result()[0]->test_group_name;
+                    echo $opd_doctor . "-" . $test->today_count;
+                  } ?>
+              </td>
               <td><a target="new" href="<?php echo site_url(ADMIN_DIR . "reception/print_token/" . $test->invoice_id); ?>"><i class="fa fa-print"></i> Print</a></td>
 
               <td>
