@@ -38,7 +38,7 @@ class MY_Controller extends CI_Controller
             $config = array(
                 "upload_path" => "./assets/uploads/" . $this->router->fetch_class() . "/",
                 "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4",
-                "max_size" => 10000,
+                "max_size" => 1024 * 100,
                 "max_width" => 0,
                 "max_height" => 0,
                 "remove_spaces" => true,
