@@ -259,7 +259,7 @@ if (!function_exists('file_type')) {
 
 
 				if ($original == false) {
-					return "<img src='" . $path_parts['dirname'] . "/" . $path_parts['filename'] . "_thumb." . $ext . "' height=" . $height . " width='" . $image_width . "' class='img-circle' />";
+					return "<img src='" . $path_parts['dirname'] . "/" . $path_parts['filename'] . "_thumb." . $ext . "' height=" . $height . " width='" . $image_width . "'  />";
 					/*return "<a href='".$path_parts['dirname']."/".$path_parts['filename'].".".$ext."' target='_blank'>
 									<img src='".$path_parts['dirname']."/".$path_parts['filename']."_thumb.".$ext."' height=".$height." width='".$image_width."' class='img-circle' />
 									</a>";*/

@@ -1,4 +1,16 @@
 <!-- PAGE HEADER-->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
+
+
 <div class="row">
   <div class="col-sm-12">
     <div class="page-header" style="min-height: 10px;">
@@ -7,10 +19,10 @@
       <!-- /STYLER -->
       <!-- BREADCRUMBS -->
       <ul class="breadcrumb">
-
+        <li><a href="<?php echo site_url(ADMIN_DIR . $this->session->userdata("role_homepage_uri")); ?>"><i class="fa fa-home"></i>Home</a></li>
 
         <li>
-          <i class="fa fa-table"></i> Today Online Appointment Dashboard
+          <i class="fa fa-table"></i> Dashboard
         </li>
 
       </ul>
@@ -20,6 +32,17 @@
   </div>
 </div>
 
+<style>
+  table>thead>tr>th,
+  .table>tbody>tr>th,
+  .table>tfoot>tr>th,
+  .table>thead>tr>td,
+  .table>tbody>tr>td,
+  .table>tfoot>tr>td {
+    padding: 5px !important;
+    font-size: 11px !important;
+  }
+</style>
 
 <?php
 
@@ -70,136 +93,94 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
   <div class="col-md-6">
     <div class="box border blue" id="messenger">
       <div class="box-title">
-        <h4><i class="fa fa-forward"></i> Today New Appointments</h4>
+        <h4><i class="fa fa-forward"></i>New Forwarded</h4>
       </div>
       <div class="box-body" style="font-size: 12px !important;">
-
-
-        <table class="table table-bordered" id="receipts_table">
+        <table class="table table-bordered" id="receipt s_table">
           <thead>
             <tr>
               <th>#</th>
-              <th>Appointments No</th>
               <th>Patient ID</th>
               <th>Patient Name</th>
-              <th>Contact</th>
+              <th>Age</th>
+              <th>Patient Address</th>
+              <th>Contact No</th>
               <th>Gender</th>
+              <th>Date</th>
               <th>Action</th>
+
             </tr>
           </thead>
           <?php
           $count = 1;
           foreach ($new_appointments as $test) {
-            $color = '';
-            if ($test->status == 1) {
-              $color = "#E9F1FC";
-            }
-            if ($test->status == 2) {
-              $color = "#ffe8e7";
-            }
-            if ($test->status == 3) {
-              $color = "#F0FFF0";
-            }
-
           ?>
-            <tr style="background-color: <?php echo $color; ?>;
-            
-            <?php if ($test->is_deleted == 1) { ?>
-              text-decoration: line-through;
-            <?php }  ?>
-            ">
-              <td><?php
-                  echo $count++;
-                  //echo $test->invoice_id; 
-                  ?> </td>
-              <td><?php
-                  if ($test->category_id != 5) {
-                    echo $test_categories[$test->category_id] . "-" . $test->today_count;
-                  } else {
-                    $query = "SELECT test_group_name FROM test_groups WHERE test_group_id = '" . $test->opd_doctor . "'";
-                    $opd_doctor = $this->db->query($query)->result()[0]->test_group_name;
-                    echo $opd_doctor . "-" . $test->today_count;
-                  } ?>
-              </td>
+            <tr style="background-color: #ffe8e7;">
+              <td> <?php echo $count++; ?> </td>
               <td><?php echo $test->patient_id; ?></td>
               <td><?php echo $test->patient_name; ?></td>
+              <td><?php echo $test->patient_age; ?></td>
+              <td><?php echo $test->patient_address; ?></td>
               <td><?php echo $test->patient_mobile_no; ?></td>
               <td><?php echo $test->patient_gender; ?></td>
-              <td>
-                <a target="new" href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/patient_history/" . $test->invoice_id); ?>">View Patient Detail</a>
-              </td>
+              <td><?php echo date('d M, Y', strtotime($test->reported_date)); ?></td>
+              <td><a href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/patient_history/" . $test->invoice_id); ?>">Patient Detail</a></td>
             </tr>
           <?php } ?>
-        </table>
 
+
+        </table>
       </div>
     </div>
   </div>
+
+
+
+
   <div class="col-md-6">
     <div class="box border blue" id="messenger">
       <div class="box-title">
-        <h4><i class="fa fa-check"></i> Today Completed Appointments</h4>
+        <h4><i class="fa fa-check"></i> Completed</h4>
       </div>
       <div class="box-body" style="font-size: 12px !important;">
+
 
         <table class="table table-bordered" id="receipts_table">
           <thead>
             <tr>
               <th>#</th>
-              <th>Appointments No</th>
               <th>Patient ID</th>
               <th>Patient Name</th>
-              <th>Contact</th>
+              <th>Age</th>
+              <th>Patient Address</th>
+              <th>Contact No</th>
               <th>Gender</th>
+              <th>Dated</th>
               <th>Action</th>
             </tr>
           </thead>
-          <?php
-          $count = 1;
-          foreach ($completed_appointments as $test) {
-            $color = '';
-            if ($test->status == 1) {
-              $color = "#E9F1FC";
-            }
-            if ($test->status == 2) {
-              $color = "#ffe8e7";
-            }
-            if ($test->status == 3) {
-              $color = "#F0FFF0";
-            }
-
-          ?>
-            <tr style="background-color: <?php echo $color; ?>;
-            
-            <?php if ($test->is_deleted == 1) { ?>
-              text-decoration: line-through;
-            <?php }  ?>
-            ">
-              <td><?php
-                  echo $count++;
-                  //echo $test->invoice_id; 
-                  ?> </td>
-              <td><?php
-                  if ($test->category_id != 5) {
-                    echo $test_categories[$test->category_id] . "-" . $test->today_count;
-                  } else {
-                    $query = "SELECT test_group_name FROM test_groups WHERE test_group_id = '" . $test->opd_doctor . "'";
-                    $opd_doctor = $this->db->query($query)->result()[0]->test_group_name;
-                    echo $opd_doctor . "-" . $test->today_count;
-                  } ?>
-              </td>
+          <?php $count = 1;
+          foreach ($completed_appointments as $test) {  ?>
+            <tr style="background-color: #F0FFF0;">
+              <td><?php echo $count++; ?></td>
               <td><?php echo $test->patient_id; ?></td>
-              <td><?php echo $test->patient_name; ?></td>
+              <td><a href="#" onclick="update_patient_detail('<?php echo $test->patient_id; ?>')"><?php echo $test->patient_name; ?></a></td>
+              <td><?php echo $test->patient_age; ?></td>
+              <td><?php echo $test->patient_address; ?></td>
               <td><?php echo $test->patient_mobile_no; ?></td>
               <td><?php echo $test->patient_gender; ?></td>
+              <td><?php echo date('d M, Y', strtotime($test->completed_date)); ?></td>
               <td>
-                <a target="new" href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/patient_history/" . $test->invoice_id); ?>">Edit Patient Detail</a>
+                <a href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/patient_history/" . $test->invoice_id); ?>">Patient Detail</a>
                 <span style="margin-left: 10px;"></span>
-                <a target="new" href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/print_patient_report/" . $test->invoice_id); ?>">Print</a>
+                <a href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/print_patient_report/" . $test->invoice_id); ?>">Print</a>
               </td>
             </tr>
           <?php } ?>
         </table>
+
+
+
       </div>
     </div>
   </div>
@@ -490,4 +471,22 @@ echo form_open_multipart(ADMIN_DIR . "reception/save_data", $add_form_attr);
 
   });
 </script>
+
+<script>
+  $(document).ready(function() {
+    $('#testGroupsTable').DataTable({
+      "pageLength": 10,
+      "lengthChange": false
+
+    });
+  });
+  $(document).ready(function() {
+    $('#receipts_table').DataTable({
+      "paging": false,
+      "lengthChange": false,
+      "sorting": false
+    });
+  });
+</script>
+
 <?php $this->load->view(ADMIN_DIR . "reception/reception_footer"); ?>

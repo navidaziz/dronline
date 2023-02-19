@@ -263,8 +263,6 @@
         </div>
         <br />
         <form action="<?php echo site_url(ADMIN_DIR . "reception/update_remark/" . $invoice_id); ?>" method="post">
-
-
           <div><strong>Remarks:</strong>
             <textarea name="test_remarks" id="test_remarks" class="form-control" style="margin-bottom: 5px;"><?php echo $invoice->remarks; ?></textarea>
           </div>
@@ -299,7 +297,9 @@
 
 
           <form action="<?php echo site_url(ADMIN_DIR . "reception/upload_attachment"); ?>" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="page_re_url" value="patient_history" />
             <input type="hidden" value="<?php echo $invoice_id; ?>" name="invoice_id" />
+            <input type="hidden" value="0" name="visit_id" />
             <table class="table">
               <tr>
                 <td>
@@ -327,6 +327,75 @@
               <h4 class="alert alert-danger">Case Forwarded to <?php echo $Doctor_name ?></h4>
             <?php } ?>
           </div>
+
+          <div class="box border blue" id="messenger">
+            <div class="box-title">
+              <h4><i class="fa fa-user"></i>Patient Visits</h4>
+            </div>
+            <div class="box-body">
+              <div>
+                <?php if ($invoice_detail->dr_prescriptions) { ?>
+                  <h5>Initial Visit</h5>
+                  <hr />
+                  <p><?php echo @$invoice_detail->dr_prescriptions; ?></p>
+                <?php } ?>
+                <?php
+                $query = "SELECT patient_visits.*, users.user_title FROM patient_visits 
+          INNER JOIN users ON (users.user_id = patient_visits.created_by)
+                    WHERE patient_id = '" . $invoice_detail->patient_id . "'";
+                $visits = $this->db->query($query)->result();
+                if ($visits) {
+                  $visit_id = 0;
+                  foreach ($visits as $visit) { ?>
+                    <div style="border: 1px solid lightgray; border-radius:5px; padding:5px;">
+                      <h5>Visit No. <?php echo $visit->visit_no;
+                                    $user_id = $this->session->userdata("user_id");
+                                    ?>
+                        <?php if ($visit->status == 0 and $visit->created_by == $user_id) { ?>
+                          <button onclick="$('#<?php echo $visit->visit_no; ?>_edit').show();$('#<?php echo $visit->visit_no; ?>_p').hide()" class="btn btn-link">Edit</button>
+                        <?php } ?>
+                        <small class="pull-right">
+                          Created By: <?php echo $visit->user_title; ?>. Dated: <?php echo date('d M, Y', strtotime($visit->created_date)); ?>
+                        </small>
+                      </h5>
+                      <hr />
+
+                      <div id="<?php echo $visit->visit_no; ?>_p">
+                        <?php echo $visit->remarks; ?>
+                      </div>
+
+
+                    </div>
+                    <br />
+                  <?php
+
+                  }
+                  ?>
+
+
+
+                <?php } ?>
+
+              </div>
+
+            </div>
+          </div>
+          <script src="//cdn.ckeditor.com/4.20.1/basic/ckeditor.js"></script>
+          <script>
+            // CKEDITOR.replace('dr_prescriptions');
+            // CKEDITOR.config.height = 150;
+
+            // function add_medicine(id) {
+
+            //   value = $('#medicine_' + id).val();
+            //   CKEDITOR.instances['dr_prescriptions'].insertHtml(value);
+
+            // }
+          </script>
+
+
+
+
         </div>
       </div>
     </div>
@@ -439,15 +508,7 @@
 <div class="footer hide_buttons">
   <section style="width: 70%; margin:0px auto; margin-bottom:5px;">
 
-    <form action="https://psra.gkp.pk/schoolReg/online_cases/add_comment" method="post">
 
-
-      <input type="hidden" name="session_id" value="2">
-      <input type="hidden" name="school_id" value="61656">
-      <input type="hidden" name="schools_id" value="563">
-      <br />
-
-    </form>
     <a class="btn btn-warning btn-sm" href="<?php echo site_url(ADMIN_DIR . "reception/index"); ?>"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back To Dashboard</a>
     <?php if ($invoice_detail->status == 3) { ?>
       <a class="btn btn-info btn-sm" href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/print_patient_report/" . $invoice_detail->invoice_id); ?>"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>

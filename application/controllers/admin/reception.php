@@ -68,14 +68,14 @@ class Reception extends Admin_Controller
 		//            AND DATE(`invoices`.`created_date`) = DATE(NOW()) 
 		// 		   AND `invoices`.`created_by` = " . $user_id . " 
 		// 		   ORDER BY `invoices`.`invoice_id` DESC";
-		$where = "`invoices`.`status` IN (1)   ORDER BY `invoices`.`invoice_id` DESC";
+		$where = "`invoices`.`status` IN (1) and is_deleted !=1   ORDER BY `invoices`.`invoice_id` DESC";
 		$this->data["new"] = $this->invoice_model->get_invoice_list($where, false);
 
-		$where = "`invoices`.`status` IN (2)   ORDER BY `invoices`.`invoice_id` DESC";
+		$where = "`invoices`.`status` IN (2) and is_deleted !=1   ORDER BY `invoices`.`reported_date` DESC";
 		$this->data["inprogress"] = $this->invoice_model->get_invoice_list($where, false);
 
 
-		$where = "`invoices`.`status` IN (3)   ORDER BY `invoices`.`invoice_id` DESC";
+		$where = "`invoices`.`status` IN (3) and is_deleted !=1   ORDER BY `invoices`.`completed_date` DESC";
 		$this->data["completed"] = $this->invoice_model->get_invoice_list($where, false);
 
 
@@ -562,6 +562,8 @@ class Reception extends Admin_Controller
 
 	public function upload_attachment()
 	{
+
+
 		if ($this->upload_file("attchment_file")) {
 			$attchment_file = $this->data["upload_data"]["file_name"];
 		} else {
@@ -570,14 +572,22 @@ class Reception extends Admin_Controller
 		$name = $this->input->post('attachment_name');
 		$detail = $this->input->post('attachment_detail');
 		$invoice_id = $this->input->post('invoice_id');
+		$visit_id = $this->input->post('visit_id');
 
 
-		$query = "INSERT INTO `patient_attachments`(`name`, `detail`, `file`, `invoice_id`) 
-		          VALUES ('" . $name . "','" . $detail . "','" . $attchment_file . "', '" . $invoice_id . "')";
+		$query = "INSERT INTO `patient_attachments`(`name`, `detail`, `file`, `invoice_id`, `visit_id`) 
+		          VALUES ('" . $name . "','" . $detail . "','" . $attchment_file . "', '" . $invoice_id . "', '" . $visit_id . "')";
+
+		$rediect = 'add_patient_history';
+		if ($this->input->post('page_re_url')) {
+			$rediect = $this->input->post('page_re_url');
+		}
+
+
 		if ($this->db->query($query)) {
-			redirect(ADMIN_DIR . "reception/add_patient_history/$invoice_id");
+			redirect(ADMIN_DIR . "reception/" . $rediect . "/$invoice_id");
 		} else {
-			redirect(ADMIN_DIR . "reception/add_patient_history/$invoice_id");
+			redirect(ADMIN_DIR . "reception/" . ".$rediect." . "/$invoice_id");
 		}
 	}
 
@@ -620,6 +630,20 @@ class Reception extends Admin_Controller
 			redirect(ADMIN_DIR . "reception/add_patient_history/$invoice_id");
 		}
 	}
+	public function delete_attachement2($invoice_id, $attachment_id)
+	{
+		$invoice_id = (int) $invoice_id;
+		$attachment_id = (int) $attachment_id;
+		$query = "SELECT * FROM patient_attachments WHERE invoice_id = '" . $invoice_id . "' and id = '" . $attachment_id . "'";
+		$attachment = $this->db->query($query)->row();
+		$this->delete_file($attachment->file);
+		$query = "DELETE FROM patient_attachments WHERE invoice_id = '" . $invoice_id . "' and id = '" . $attachment_id . "'";
+		if ($this->db->query($query)) {
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
+		} else {
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
+		}
+	}
 
 	public function delete_file($file_path)
 	{
@@ -642,9 +666,9 @@ class Reception extends Admin_Controller
 			    WHERE `invoice_id` = '" . $invoice_id . "'";
 
 		if ($this->db->query($query)) {
-			redirect(ADMIN_DIR . "reception/add_patient_history/$invoice_id");
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
 		} else {
-			redirect(ADMIN_DIR . "reception/add_patient_history/$invoice_id");
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
 		}
 	}
 
@@ -699,5 +723,152 @@ class Reception extends Admin_Controller
 			$this->session->set_flashdata("msg_error", "DB Error try again.");
 			redirect(ADMIN_DIR . "reception");
 		}
+	}
+
+	function patient_history($invoice_id)
+	{
+		$invoice_id = (int) $invoice_id;
+		$this->data["view"] = ADMIN_DIR . "reception/patient_history";
+		$this->load->view(ADMIN_DIR . "layout", $this->patient_data($invoice_id));
+	}
+
+	public function patient_data($invoice_id)
+	{
+		$invoice_id = (int) $invoice_id;
+		$this->data["invoice_id"] = $invoice_id;
+		$where = "`invoices`.`status` IN (1,2,3) AND `invoices`.`invoice_id`= '" . $invoice_id . "'";
+		$this->data["invoice_detail"] = $this->invoice_model->get_invoice_list($where, false)[0];
+
+		$patient_test_ids = "";
+		$query = "SELECT
+			`test_groups`.`test_group_id`,
+			`test_groups`.`test_group_name`
+			, `test_groups`.`test_time` 
+		FROM `test_groups`,
+				`patient_tests` 
+		WHERE `test_groups`.`test_group_id` = `patient_tests`.`test_group_id`
+		AND `patient_tests`.`invoice_id`=$invoice_id
+		GROUP BY `test_groups`.`test_group_name`
+		ORDER BY `patient_tests`.`patient_test_id` ASC;";
+
+		$patient_tests_groups = $this->db->query($query)->result();
+		foreach ($patient_tests_groups as $patient_tests_group) {
+			$patient_test_ids .= $patient_tests_group->test_group_id . ", ";
+			$where = "`patient_tests`.`invoice_id` = '" . $invoice_id . "'
+			AND `patient_tests`.`test_group_id` = '" . $patient_tests_group->test_group_id . "' ";
+			$patient_tests_group->patient_tests = $this->patient_test_model->get_patient_test_list($where, false);
+		}
+		$this->data["patient_tests_groups"] = $patient_tests_groups;
+		$this->data["patient_test_ids"] = rtrim($patient_test_ids, ", ");
+
+		$query = "SELECT * FROM `invoices` WHERE `invoices`.`invoice_id`=$invoice_id;";
+		$invoice = $this->db->query($query)->result()[0];
+		$query = "SELECT 
+					`test_groups`.`test_group_name`, 
+					`invoice_test_groups`.`price`,
+					`test_groups`.`test_price`,
+					`test_groups`.`test_time` 
+				FROM
+					`invoice_test_groups`,
+					`test_groups` 
+				WHERE `invoice_test_groups`.`test_group_id` = `test_groups`.`test_group_id` 
+				AND `invoice_test_groups`.`invoice_id`=$invoice_id;";
+		$invoice->invoice_details = $this->db->query($query)->result();
+		$this->data["invoice"] = $invoice;
+		return $this->data;
+	}
+	public function add_visit()
+	{
+		$patient_id = (int) $this->input->post('patient_id');
+		$history_id = (int) $this->input->post('history_id');
+		$query = "SELECT COUNT(*) as total FROM patient_visits 
+		          WHERE patient_id = '" . $patient_id . "'
+				  AND history_id = '" . $history_id . "'";
+		$visit_no = $this->db->query($query)->row()->total;
+		if ($visit_no <= 0) {
+			$visit_no = 1;
+		} else {
+			$visit_no++;
+		}
+		$user_id = $this->session->userdata('user_id');
+
+		$query = "UPDATE `patient_visits` SET `status`=0 WHERE created_by = '" . $user_id . "'
+		and patient_id = '" . $patient_id . "'";
+		$this->db->query($query);
+
+		$query = "INSERT INTO `patient_visits`(`visit_no`, `history_id`, `patient_id`, `remarks`, `created_by`) 
+		          VALUES ('" . $visit_no . "', '" . $history_id . "', '" . $patient_id . "', '', '" . $user_id . "')";
+		$this->db->query($query);
+		redirect(ADMIN_DIR . "reception/patient_history/$history_id");
+	}
+	public function update_visit()
+	{
+		$visit_id = (int) $this->input->post('visit_id');
+		$patient_id = (int) $this->input->post('patient_id');
+		$history_id = (int) $this->input->post('history_id');
+		$dr_prescriptions = $this->db->escape($this->input->post("dr_prescriptions"));
+		$query = "UPDATE `patient_visits` SET `remarks`=" . $dr_prescriptions . " WHERE visit_id = '" . $visit_id . "'";
+		$this->db->query($query);
+		redirect(ADMIN_DIR . "reception/patient_history/$history_id");
+	}
+
+	public function get_patient_history_detail()
+	{
+		$this->data['id'] = (int) $this->input->post('id');
+		$this->data['patient_id'] = (int) $this->input->post('patient_id');
+		$this->data['history_id'] = (int) $this->input->post('history_id');
+		$this->load->view(ADMIN_DIR . "reception/patient_history_edit", $this->data);
+	}
+
+	public function update_patient_test_detail()
+	{
+		$patient_test_id = (int) $this->input->post('patient_test_id');
+		//$patient_id = (int) $this->input->post('patient_id');
+		$invoice_id = (int) $this->input->post('invoice_id');
+		$test_result = $this->db->escape($this->input->post('test_result'));
+		$query = "UPDATE `patient_tests` SET `test_result`= $test_result
+		          WHERE patient_test_id = '" . $patient_test_id . "'
+				  AND invoice_id = '" . $invoice_id . "'";
+		if ($this->db->query($query)) {
+			$this->session->set_flashdata("msg_success", "Update successfully");
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
+		} else {
+			$this->session->set_flashdata("msg_error", "Error while update successfully");
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
+		}
+	}
+
+	public function update_marks()
+	{
+
+		$this->data['patient_id'] = (int) $this->input->post('patient_id');
+		$this->data['history_id'] = (int) $this->input->post('history_id');
+		$this->load->view(ADMIN_DIR . "reception/patient_history_remarks_edit", $this->data);
+	}
+
+	public function update_mark_detail()
+	{
+		$invoice_id = (int) $this->input->post('invoice_id');
+		$patient_id = (int) $this->input->post('patient_id');
+		$remarks = $this->db->escape($this->input->post("remarks"));
+		$query = "UPDATE `invoices` 
+				SET  `remarks`= $remarks
+			    WHERE `invoice_id` = '" . $invoice_id . "'
+				AND patient_id = '" . $patient_id . "'";
+		if ($this->db->query($query)) {
+			$this->session->set_flashdata("msg_success", "Update successfully");
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
+		} else {
+			$this->session->set_flashdata("msg_error", "Error while update successfully");
+			redirect(ADMIN_DIR . "reception/patient_history/$invoice_id");
+		}
+	}
+
+	public function get_visit_update_form()
+	{
+		$this->data['visit_id'] = (int) $this->input->post('id');
+		$this->data['patient_id'] = (int) $this->input->post('patient_id');
+		$this->data['history_id'] = (int) $this->input->post('history_id');
+		$this->load->view(ADMIN_DIR . "reception/get_visit_update_form", $this->data);
 	}
 }

@@ -73,9 +73,14 @@
         margin: 0;
         box-shadow: 0;
         color: black;
+        width: 100%;
       }
 
-
+      page[size="A4"] {
+        width: 100%;
+        /* height: 29.7cm;  */
+        height: auto;
+      }
 
     }
 
@@ -99,7 +104,7 @@
 <body>
   <page size='A4'>
 
-    <div style="padding-left: 40px; padding-right: 40px; padding-top:0px !important;" contenteditable="true">
+    <div style="padding-left: 40px; padding-right: 40px; padding-top:0px !important; width:100%">
 
       <table style="width: 100%;" style="color:black">
         <thead>
@@ -229,37 +234,41 @@
             <td style="border-left: 1px solid gray; padding-left:5px; vertical-align:top; ">
               <div style="margin-left: 10px;">
 
-                <h4>Physician Prescriptions:</h4>
-                <p><?php echo @$invoice_detail->dr_prescriptions; ?></p>
-                <p style="text-align: right;">
-
-
-                  <br />
-                  <br />
-                <p style="text-align: right;">
-                  <?php
-
-                  $query = "SELECT `test_report_by` FROM `invoices` 
-                        WHERE `invoice_id`= '" . $invoice_detail->invoice_id . "' ";
-                  if ($this->db->query($query)->row()) {
-                    $test_report_by = $this->db->query($query)->row()->test_report_by;
-
-                    $query = "SELECT
-                                `roles`.`role_title`,
-                                `users`.`user_title` ,
-                                `users`.`designation` ,
-                                `users`.`user_mobile_number`
-                            FROM `roles`,
-                            `users` 
-                            WHERE `roles`.`role_id` = `users`.`role_id`
-                            AND `users`.`user_id`='" . $test_report_by . "'";
-                    $opd_doctor = $this->db->query($query)->row();
+                <?php if ($invoice_detail->dr_prescriptions) { ?>
+                  <h5>Initial Visit</h5>
+                  <hr />
+                  <p><?php echo @$invoice_detail->dr_prescriptions; ?></p>
+                <?php } ?>
+                <?php
+                $query = "SELECT patient_visits.*, users.user_title FROM patient_visits 
+          INNER JOIN users ON (users.user_id = patient_visits.created_by)
+                    WHERE patient_id = '" . $invoice_detail->patient_id . "'";
+                $visits = $this->db->query($query)->result();
+                if ($visits) {
+                  $visit_id = 0;
+                  foreach ($visits as $visit) { ?>
+                    <div>
+                      <h5>Visit No. <?php echo $visit->visit_no; ?>
+                        <small class="pull-right">
+                          Created By: <?php echo $visit->user_title; ?>. Dated: <?php echo date('d M, Y', strtotime($visit->created_date)); ?>
+                        </small>
+                      </h5>
+                      <hr />
+                      <p>
+                        <?php echo $visit->remarks; ?>
+                      </p>
+                    </div>
+                    <br />
+                  <?php }
                   ?>
-                    Prescribed By: <br />
-                    <strong><?php echo $opd_doctor->user_title ?></strong><br />
-                    <?php echo $opd_doctor->designation ?>
-                  <?php } ?>
-                </p>
+
+                <?php } ?>
+
+
+
+
+                <br />
+                <br />
 
               </div>
               <br />

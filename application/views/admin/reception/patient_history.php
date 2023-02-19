@@ -4,7 +4,7 @@
       <ul class="breadcrumb">
         <li>
           <i class="fa fa-home"></i>
-          <a href="<?php echo site_url(ADMIN_DIR . "dr_dashboard"); ?>">Dashboard</a>
+          <a href="<?php echo site_url(ADMIN_DIR . "reception"); ?>">Dashboard</a>
         </li>
         <li>
           <i class="fa fa-table"></i> Patient History
@@ -71,12 +71,11 @@
             </td>
           </tr>
         </table>
-
-
-
-
       </div>
     </div>
+
+
+
 
     <div class="box border blue" id="messenger">
       <div class="box-title">
@@ -87,9 +86,66 @@
         <page size='A4'>
 
           <div>
+            <!-- Modal content-->
+            <div id="information_model" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+                <div class="modal-content" id="model_body"></div>
+              </div>
+            </div>
+
+            <script>
+              function edit_visit(id) {
+                $('#information_model').modal('show');
+                $('#model_body').html('please wait .....');
+                $.ajax({
+                  type: "POST",
+                  url: "<?php echo site_url(ADMIN_DIR . "reception/get_visit_update_form/") ?>",
+                  data: {
+                    id: id,
+                    patient_id: <?php echo $invoice_detail->patient_id; ?>,
+                    history_id: <?php echo $invoice_detail->invoice_id; ?>
+                  }
+                }).done(function(data) {
+                  $('#model_body').html(data);
+                });
+              }
+            </script>
+            <script>
+              function update_test(id) {
+                $('#information_model').modal('show');
+                $('#model_body').html('please wait .....');
+                $.ajax({
+                  type: "POST",
+                  url: "<?php echo site_url(ADMIN_DIR . "reception/get_patient_history_detail/") ?>",
+                  data: {
+                    id: id,
+                    patient_id: <?php echo $invoice_detail->patient_id; ?>,
+                    history_id: <?php echo $invoice_detail->invoice_id; ?>
+                  }
+                }).done(function(data) {
+                  $('#model_body').html(data);
+                });
+              }
+            </script>
+            <script>
+              function update_remarks() {
+                $('#information_model').modal('show');
+                $('#model_body').html('please wait .....');
+                $.ajax({
+                  type: "POST",
+                  url: "<?php echo site_url(ADMIN_DIR . "reception/update_marks/") ?>",
+                  data: {
+                    patient_id: <?php echo $invoice_detail->patient_id; ?>,
+                    history_id: <?php echo $invoice_detail->invoice_id; ?>
+                  }
+                }).done(function(data) {
+                  $('#model_body').html(data);
+                });
+              }
+            </script>
+            <!-- End Modal content-->
 
             <table style="width: 100%;" style="color:black">
-
               <tbody>
                 <tr>
                   <td>
@@ -104,13 +160,16 @@
                       <table class="table">
                         <?php if ($patient_tests_group->test_group_id == 1) { ?>
 
-                          <?php foreach ($patient_tests_group->patient_tests as $patient_test) { ?>
+                          <?php foreach ($patient_tests_group->patient_tests as $patient_test) {
+                            // var_dump($patient_test);
+                          ?>
                             <tr>
                               <th style="width: 200px;"><?php echo $patient_test->test_name; ?></th>
                               <td>
                                 <?php echo $patient_test->test_result; ?>
                                 <?php echo $patient_test->result_suffix; ?>
                                 <small> <?php echo $patient_test->unit; ?> </small>
+                                <small class="btn btn-link" onclick="update_test('<?php echo $patient_test->patient_test_id; ?>')" class="pull-right">Edit</small>
                               </td>
                             </tr>
                           <?php } ?>
@@ -172,8 +231,14 @@
                 <tr>
                   <td>
                     <br />
-                    <?php if ($invoice_detail->remarks) { ?>
-                      <div style="text-align: left; color:black"><strong>Remarks:</strong>
+                    <?php if ($invoice_detail->remarks or 1 == 1) { ?>
+
+                      <p>
+                        <strong>Remarks:</strong>
+                        <small class="pull-right">
+                          <button onclick="update_remarks()" class="btn btn-link">Edit</button></small>
+                      </p>
+                      <div style="text-align: left; color:black">
                         <p style="border: 1px dashed #ddd; border-radius: 5px; padding: 5px;">
                           <?php echo $invoice_detail->remarks; ?>
                         </p>
@@ -228,7 +293,7 @@
                   <?php echo file_type(base_url("assets/uploads/reception/" . $attachment->file), true); ?> </a>
                 <?php } ?>
                 <br />
-                <small> <a href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/delete_attachement/$invoice_id/" . $attachment->id); ?>" onclick="return confirm('Are you sure? you want to remove ?')">Remove Attachment</a> </small>
+                <small> <a href="<?php echo site_url(ADMIN_DIR . "reception/delete_attachement2/$invoice_id/" . $attachment->id); ?>" onclick="return confirm('Are you sure? you want to remove ?')">Remove Attachment</a> </small>
                 <br />
               </div>
             <?php
@@ -238,9 +303,11 @@
 
         </div>
         <?php
+        $user_id = $this->session->userdata("user_id");
         $query = "SELECT patient_visits.visit_id FROM patient_visits 
                   WHERE patient_id = '" . $invoice_detail->patient_id . "'
-                  AND status=1";
+                  AND status=1
+                  AND created_by = '" . $user_id . "'";
         $visit_lates = $this->db->query($query)->row();
         if ($visit_lates) {
           $visit_id = $visit_lates->visit_id;
@@ -248,7 +315,8 @@
           $visit_id = 0;
         }
         ?>
-        <form action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/upload_attachment"); ?>" method="post" enctype="multipart/form-data">
+        <form action="<?php echo site_url(ADMIN_DIR . "reception/upload_attachment"); ?>" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="page_re_url" value="patient_history" />
           <input type="hidden" value="<?php echo $invoice_id; ?>" name="invoice_id" />
           <input type="hidden" value="<?php echo $visit_id; ?>" name="visit_id" />
           <table class="table">
@@ -278,37 +346,11 @@
 
 
   </div>
-
-  <!-- Modal content-->
-  <div id="information_model" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content" id="model_body"></div>
-    </div>
-  </div>
-
   <div class="col-md-6">
     <div class="box border blue" id="messenger">
       <div class="box-title">
         <h4><i class="fa fa-user"></i>Patient Visits</h4>
       </div>
-
-      <script>
-        function edit_visit(id) {
-          $('#information_model').modal('show');
-          $('#model_body').html('please wait .....');
-          $.ajax({
-            type: "POST",
-            url: "<?php echo site_url(ADMIN_DIR . "dr_dashboard/get_visit_update_form/") ?>",
-            data: {
-              id: id,
-              patient_id: <?php echo $invoice_detail->patient_id; ?>,
-              history_id: <?php echo $invoice_detail->invoice_id; ?>
-            }
-          }).done(function(data) {
-            $('#model_body').html(data);
-          });
-        }
-      </script>
       <div class="box-body">
         <div>
           <?php if ($invoice_detail->dr_prescriptions) { ?>
@@ -324,6 +366,8 @@
           if ($visits) {
             $visit_id = 0;
             foreach ($visits as $visit) { ?>
+
+
               <div style="border: 1px solid lightgray; border-radius:5px; padding:5px;">
                 <h5>Visit No. <?php echo $visit->visit_no;
                               $user_id = $this->session->userdata("user_id");
@@ -338,9 +382,9 @@
                   </small>
                 </h5>
                 <hr />
-
                 <?php if ($visit->status == 1 and $visit->created_by == $user_id) { ?>
-                  <form id="<?php echo $visit->visit_no; ?>_edit" <?php if ($visit->status == 0) { ?> style="display:none" <?php } ?> onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/update_visit"); ?>" method="post">
+
+                  <form id="<?php echo $visit->visit_no; ?>_edit" <?php if ($visit->status == 0) { ?> style="display:none" <?php } ?> onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "reception/update_visit"); ?>" method="post">
                     <?php $visit_id = $visit->visit_id; ?>
                     <input type="hidden" value="<?php echo $visit->visit_id; ?>" name="visit_id" />
                     <input type="hidden" value="<?php echo $invoice_detail->patient_id; ?>" name="patient_id" />
@@ -360,20 +404,25 @@
                   </form>
                 <?php } else { ?>
                   <div id="<?php echo $visit->visit_no; ?>_p">
-                    <?php echo $visit->remarks; ?>
+                    <?php if ($visit->remarks) { ?>
+                      <?php echo $visit->remarks; ?>
+                    <?php } else { ?>
+                      <?php echo "Visit remarks pending...."; ?>
+                    <?php } ?>
                   </div>
                 <?php  } ?>
 
-
-
               </div>
+
               <br />
-            <?php }
+            <?php
+
+            }
             ?>
 
 
 
-            <!-- <form action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/upload_attachment"); ?>" method="post" enctype="multipart/form-data">
+            <!-- <form action="<?php echo site_url(ADMIN_DIR . "reception/upload_attachment"); ?>" method="post" enctype="multipart/form-data">
               <input type="hidden" value="<?php echo $invoice_id; ?>" name="invoice_id" />
               <input type="hidden" value="<?php echo $visit->visit_id; ?>" name="visit_id" />
               <table class="table">
@@ -401,7 +450,7 @@
 
         </div>
         <div style="text-align: center;">
-          <form onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/add_visit"); ?>" method="post">
+          <form onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "reception/add_visit"); ?>" method="post">
             <input type="hidden" value="<?php echo $invoice_detail->patient_id; ?>" name="patient_id" />
             <input type="hidden" value="<?php echo $invoice_detail->invoice_id; ?>" name="history_id" />
             <input class="btn btn-primary" type="submit" name="Add New Visit" value="Add New Visit" />
@@ -441,26 +490,31 @@
 <div class="footer hide_buttons">
   <section style="width: 70%; margin:0px auto; margin-bottom:5px;">
 
-    <form action="https://psra.gkp.pk/schoolReg/online_cases/add_comment" method="post">
 
-
-      <input type="hidden" name="session_id" value="2">
-      <input type="hidden" name="school_id" value="61656">
-      <input type="hidden" name="schools_id" value="563">
-      <br />
-
-    </form>
-    <a class="btn btn-warning btn-sm" href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/index"); ?>"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back To Dashboard</a>
+    <a class="btn btn-warning btn-sm" href="<?php echo site_url(ADMIN_DIR . "reception/index"); ?>"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back To Dashboard</a>
 
 
 
 
-    <a class="btn btn-info btn-sm" href="<?php echo site_url(ADMIN_DIR . "dr_dashboard/print_patient_report/" . $invoice_detail->invoice_id); ?>" target="_blank"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>
+    <a class="btn btn-info btn-sm" href="<?php echo site_url(ADMIN_DIR . "reception/print_patient_report/" . $invoice_detail->invoice_id); ?>" target="_blank"><i class="fa fa-print" aria-hidden="true"></i> Print Report</a>
 
-    <?php
-    if ($invoice_detail->status == 2) { ?>
-      <form onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/mark_as_complete/$invoice_id"); ?>" method="post" style="display: inline;">
-        <button class="btn btn-danger btn-sm" style="display: inline;"> <i class="fa fa-check" aria-hidden="true"></i> Mark as complete</button>
+    <?php if ($invoice_detail->status == 3) {
+      if ($invoice_detail->category_id != 5) {
+
+        $query = "SELECT test_category FROM test_categories WHERE test_category_id= '" . $invoice_detail->category_id . "'";
+        $Doctor_name = $this->db->query($query)->result()[0]->test_category;
+        // echo " - " . $invoice_detail->today_count;
+      } else {
+        $query = "SELECT test_group_name FROM test_groups WHERE test_group_id = '" . $invoice_detail->opd_doctor . "'";
+        $opd_doctor = $this->db->query($query)->result()[0]->test_group_name;
+        $Doctor_name = $opd_doctor;
+        //echo "" . $opd_doctor . ' - ';
+        //echo  $invoice_detail->today_count;
+      }
+    ?>
+
+      <form style="display: inline;" onsubmit="return confirm('Do you really want to submit the form?');" action="<?php echo site_url(ADMIN_DIR . "reception/complete_and_forward/$invoice_id"); ?>" method="post">
+        <button class="btn btn-danger btn-sm"> <i class="fa fa-forward" aria-hidden="true"></i> Again Forward to <?php echo $Doctor_name ?> Online</button>
       </form>
     <?php } ?>
 

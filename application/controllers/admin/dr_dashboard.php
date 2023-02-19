@@ -182,4 +182,102 @@ class Dr_dashboard extends Admin_Controller
 		$this->data["invoice"] = $invoice;
 		return $this->data;
 	}
+
+	public function add_visit()
+	{
+		$patient_id = (int) $this->input->post('patient_id');
+		$history_id = (int) $this->input->post('history_id');
+		$query = "SELECT COUNT(*) as total FROM patient_visits 
+		          WHERE patient_id = '" . $patient_id . "'
+				  AND history_id = '" . $history_id . "'";
+		$visit_no = $this->db->query($query)->row()->total;
+		if ($visit_no <= 0) {
+			$visit_no = 1;
+		} else {
+			$visit_no++;
+		}
+		$user_id = $this->session->userdata('user_id');
+
+		$query = "UPDATE `patient_visits` SET `status`=0 WHERE created_by = '" . $user_id . "'
+		and patient_id = '" . $patient_id . "'";
+		$this->db->query($query);
+
+		$query = "INSERT INTO `patient_visits`(`visit_no`, `history_id`, `patient_id`, `remarks`, `created_by`) 
+		          VALUES ('" . $visit_no . "', '" . $history_id . "', '" . $patient_id . "', '', '" . $user_id . "')";
+		$this->db->query($query);
+		redirect(ADMIN_DIR . "dr_dashboard/patient_history/$history_id");
+	}
+	public function update_visit()
+	{
+		$visit_id = (int) $this->input->post('visit_id');
+		$patient_id = (int) $this->input->post('patient_id');
+		$history_id = (int) $this->input->post('history_id');
+		$dr_prescriptions = $this->db->escape($this->input->post("dr_prescriptions"));
+		$query = "UPDATE `patient_visits` SET `remarks`=" . $dr_prescriptions . " WHERE visit_id = '" . $visit_id . "'";
+		$this->db->query($query);
+		redirect(ADMIN_DIR . "dr_dashboard/patient_history/$history_id");
+	}
+
+	public function upload_attachment()
+	{
+		$config = array(
+			"upload_path" => "./assets/uploads/reception/",
+			"allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4",
+			"max_size" => 1024 * 100,
+			"max_width" => 0,
+			"max_height" => 0,
+			"remove_spaces" => true,
+			"encrypt_name" => true
+		);
+		if ($this->upload_file("attchment_file", $config)) {
+			$attchment_file = $this->data["upload_data"]["file_name"];
+		} else {
+			$attchment_file = "";
+		}
+		$name = $this->input->post('attachment_name');
+		$detail = $this->input->post('attachment_detail');
+		$invoice_id = $this->input->post('invoice_id');
+		$visit_id = $this->input->post('visit_id');
+
+
+		$query = "INSERT INTO `patient_attachments`(`name`, `detail`, `file`, `invoice_id`, `visit_id`) 
+		          VALUES ('" . $name . "','" . $detail . "','" . $attchment_file . "', '" . $invoice_id . "', '" . $visit_id . "')";
+		if ($this->db->query($query)) {
+			redirect(ADMIN_DIR . "dr_dashboard/patient_history/$invoice_id");
+		} else {
+			redirect(ADMIN_DIR . "dr_dashboard/patient_history/$invoice_id");
+		}
+	}
+	public function delete_attachement($invoice_id, $attachment_id)
+	{
+		$invoice_id = (int) $invoice_id;
+		$attachment_id = (int) $attachment_id;
+		$query = "SELECT * FROM patient_attachments WHERE invoice_id = '" . $invoice_id . "' and id = '" . $attachment_id . "'";
+		$attachment = $this->db->query($query)->row();
+		$this->delete_file($attachment->file);
+		$query = "DELETE FROM patient_attachments WHERE invoice_id = '" . $invoice_id . "' and id = '" . $attachment_id . "'";
+		if ($this->db->query($query)) {
+			redirect(ADMIN_DIR . "dr_dashboard/patient_history/$invoice_id");
+		} else {
+			redirect(ADMIN_DIR . "dr_dashboard/patient_history/$invoice_id");
+		}
+	}
+	public function delete_file($file_path)
+	{
+
+		@$path_parts = pathinfo($file_path);
+		@$orginal_file = FCPATH . "assets/uploads/" . $file_path;
+		@$thumb_file = FCPATH . "assets/uploads/" . $path_parts['dirname'] . "/" . $path_parts['filename'] . "_thumb." . $path_parts['extension'];
+		@unlink($orginal_file);
+		@unlink($thumb_file);
+		return true;
+	}
+
+	public function get_visit_update_form()
+	{
+		$this->data['visit_id'] = (int) $this->input->post('id');
+		$this->data['patient_id'] = (int) $this->input->post('patient_id');
+		$this->data['history_id'] = (int) $this->input->post('history_id');
+		$this->load->view(ADMIN_DIR . "dr_dashboard/get_visit_update_form", $this->data);
+	}
 }
