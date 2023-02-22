@@ -34,6 +34,10 @@ class MY_Controller extends CI_Controller
      */
     public function upload_file($field_name, $config = NULL)
     {
+
+        echo $field_name;
+        exit();
+
         if (is_null($config)) {
             $config = array(
                 "upload_path" => "./assets/uploads/" . $this->router->fetch_class() . "/",
