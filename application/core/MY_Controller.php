@@ -79,59 +79,114 @@ class MY_Controller extends CI_Controller
         //     }
         // }
         // exit();
-        // $uploadedfile = $_FILES[$field_name]['tmp_name'];
-        // $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        // echo $mime = finfo_file($finfo, $uploadedfile);
-        // exit();
+        $uploadedfile = $_FILES[$field_name]['tmp_name'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $uploadedfile);
 
+        $extension = pathinfo($_FILES[$field_name]['name'], PATHINFO_EXTENSION);
+        if ($extension === 'zip') {
 
-        if (is_null($config)) {
-            $config = array(
-                "upload_path" => "./assets/uploads/" . $this->router->fetch_class() . "/",
-                "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4|wmv|WMV|avi|zip",
-                //"allowed_types" => "asf|ASF",
+            if (isset($_FILES[$field_name]) && $_FILES[$field_name]['error'] === UPLOAD_ERR_OK) {
+                $allowedExtensions = ['zip'];
+                $maxFileSize = 1048576; // 1MB
+                $uploadDir = "./assets/uploads/reception/";
 
-                "max_size" => 1024 * 50000,
-                "max_width" => 0,
-                "max_height" => 0,
-                "remove_spaces" => true,
-                "encrypt_name" => true
-            );
-        }
+                // Check file extension
 
-        $dir = $config["upload_path"];
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777);
-        }
+                if (!in_array(strtolower($extension), $allowedExtensions)) {
+                    echo 'Invalid file extension.';
+                    exit;
+                }
 
-        $this->load->library("upload", $config);
+                // Check file size
+                $fileSize = $_FILES[$field_name]['size'];
+                if ($fileSize > $maxFileSize) {
+                    echo 'File size exceeds maximum allowed size.';
+                    exit;
+                }
 
-        if (!$this->upload->do_upload($field_name)) {
+                // Extract zip file and scan for malicious content
+                $zip = new ZipArchive;
+                if ($zip->open($_FILES[$field_name]['tmp_name']) === true) {
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $filename = $zip->getNameIndex($i);
+                        $fileInfo = pathinfo($filename);
 
-            $this->data['upload_error'] = $this->upload->display_errors();
-            var_dump($this->data['upload_error']);
-            return false;
+                        // Check for malicious content
+                        if (strpos($fileInfo['basename'], 'php') !== false || strpos($fileInfo['basename'], 'sh') !== false) {
+                            echo 'Malicious file detected.';
+                            $zip->close();
+                            exit;
+                        }
+                    }
+
+                    // Save zip file
+                    $filename = uniqid() . '_' . $_FILES[$field_name]['name'];
+                    $this->data["upload_data"]["file_name"] = $filename;
+                    $uploadPath = $uploadDir . $filename;
+                    if (move_uploaded_file($_FILES[$field_name]['tmp_name'], $uploadPath)) {
+                        // echo 'File uploaded successfully.';
+                        return true;
+                    } else {
+                        echo 'File upload failed.';
+                    }
+                    $zip->close();
+                } else {
+                    echo 'Invalid zip file.';
+                }
+            } else {
+                echo 'No file uploaded.';
+            }
+            exit();
         } else {
+            if (is_null($config)) {
+                $config = array(
+                    "upload_path" => "./assets/uploads/" . $this->router->fetch_class() . "/",
+                    "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4|wmv|WMV|avi|zip",
+                    //"allowed_types" => "asf|ASF",
 
-            $this->data['upload_data'] = $this->upload->data();
+                    "max_size" => 1024 * 50000,
+                    "max_width" => 0,
+                    "max_height" => 0,
+                    "remove_spaces" => true,
+                    "encrypt_name" => true
+                );
+            }
+
+            $dir = $config["upload_path"];
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777);
+            }
+
+            $this->load->library("upload", $config);
+
+            if (!$this->upload->do_upload($field_name)) {
+
+                $this->data['upload_error'] = $this->upload->display_errors();
+                var_dump($this->data['upload_error']);
+                return false;
+            } else {
+
+                $this->data['upload_data'] = $this->upload->data();
 
 
-            //now create image thumbnail
-            //if($this->data['upload_data']['is_image'] == true){
+                //now create image thumbnail
+                //if($this->data['upload_data']['is_image'] == true){
 
-            $config['image_library'] = 'gd2';
-            $config['source_image']    = $dir . $this->data['upload_data']['file_name'];
-            $config['create_thumb'] = TRUE;
-            //$config['maintain_ratio'] = TRUE;
-            $config['width']    = 100;
-            $config['height']    = 100;
+                $config['image_library'] = 'gd2';
+                $config['source_image']    = $dir . $this->data['upload_data']['file_name'];
+                $config['create_thumb'] = TRUE;
+                //$config['maintain_ratio'] = TRUE;
+                $config['width']    = 100;
+                $config['height']    = 100;
 
-            //$this->load->library('image_lib', $config); 
-            $this->image_lib->initialize($config);
+                //$this->load->library('image_lib', $config); 
+                $this->image_lib->initialize($config);
 
-            $this->image_lib->resize();
-            //}
-            return true;
+                $this->image_lib->resize();
+                //}
+                return true;
+            }
         }
     }
     //------------------------------------------------------------------------------------
