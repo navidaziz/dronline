@@ -249,6 +249,9 @@
         }
         ?>
         <form action="<?php echo site_url(ADMIN_DIR . "dr_dashboard/upload_attachment"); ?>" method="post" enctype="multipart/form-data">
+
+
+          <input type="hidden" value="add_patient_history" name="page_re_url" />
           <input type="hidden" value="<?php echo $invoice_id; ?>" name="invoice_id" />
           <input type="hidden" value="<?php echo $visit_id; ?>" name="visit_id" />
           <table class="table">

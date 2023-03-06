@@ -36,11 +36,62 @@ class MY_Controller extends CI_Controller
     {
 
 
+        // if (isset($_FILES[$field_name])) {
+        //     $file_name = $_FILES[$field_name]['name'];
+        //     $file_tmp = $_FILES[$field_name]['tmp_name'];
+        //     $file_size = $_FILES[$field_name]['size'];
+        //     $file_type = $_FILES[$field_name]['type'];
+        //     $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+        //     // Set the upload directory
+        //     $upload_dir = './assets/uploads/';
+
+        //     // Set the allowed file types
+        //     $allowed_types = array('jpg', 'jpeg', 'bmp', 'png', 'gif', 'doc', 'docx', 'xlsx', 'xls', 'pdf', 'ppt', 'pptx', 'webp', 'mp4', 'wmv', 'avi');
+
+        //     // Check if the file type is allowed
+        //     if (in_array($file_ext, $allowed_types)) {
+
+        //         // Set the maximum file size (in bytes)
+        //         $max_size = 1024 * 5000; // 500 KB
+
+        //         // Check if the file size is within the allowed limit
+        //         if ($file_size <= $max_size) {
+
+        //             // Generate a unique name for the uploaded file
+        //             $new_file_name = md5(uniqid()) . '.' . $file_ext;
+
+        //             // Move the uploaded file to the upload directory
+        //             if (move_uploaded_file($file_tmp, $upload_dir . $new_file_name)) {
+        //                 // File uploaded successfully
+        //                 echo "File uploaded successfully.";
+        //             } else {
+        //                 // Error uploading file
+        //                 echo "Error uploading file.";
+        //             }
+        //         } else {
+        //             // File size is too large
+        //             echo "File size is too large. Maximum file size is 500 KB.";
+        //         }
+        //     } else {
+        //         // Invalid file type
+        //         echo "Invalid file type. Allowed file types are: " . implode(', ', $allowed_types);
+        //     }
+        // }
+        // exit();
+        // $uploadedfile = $_FILES[$field_name]['tmp_name'];
+        // $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        // echo $mime = finfo_file($finfo, $uploadedfile);
+        // exit();
+
+
         if (is_null($config)) {
             $config = array(
                 "upload_path" => "./assets/uploads/" . $this->router->fetch_class() . "/",
-                "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4|wmv|WMV",
-                "max_size" => 1024 * 100,
+                "allowed_types" => "jpg|jpeg|bmp|png|gif|doc|docx|xlsx|xls|pdf|ppt|pptx|webp|mp4|wmv|WMV|avi|zip",
+                //"allowed_types" => "asf|ASF",
+
+                "max_size" => 1024 * 50000,
                 "max_width" => 0,
                 "max_height" => 0,
                 "remove_spaces" => true,
@@ -58,6 +109,7 @@ class MY_Controller extends CI_Controller
         if (!$this->upload->do_upload($field_name)) {
 
             $this->data['upload_error'] = $this->upload->display_errors();
+            var_dump($this->data['upload_error']);
             return false;
         } else {
 
