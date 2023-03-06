@@ -84,10 +84,10 @@ class MY_Controller extends CI_Controller
         $mime = finfo_file($finfo, $uploadedfile);
 
         $extension = pathinfo($_FILES[$field_name]['name'], PATHINFO_EXTENSION);
-        if ($extension === 'zip') {
+        if ($extension === 'zip' or $extension === 'wmv') {
 
             if (isset($_FILES[$field_name]) && $_FILES[$field_name]['error'] === UPLOAD_ERR_OK) {
-                $allowedExtensions = ['zip'];
+                $allowedExtensions = ['zip', 'wmv'];
                 $maxFileSize = 1048576; // 1MB
                 $uploadDir = "./assets/uploads/reception/";
 
@@ -132,7 +132,16 @@ class MY_Controller extends CI_Controller
                     }
                     $zip->close();
                 } else {
-                    echo 'Invalid zip file.';
+                    // Save zip file
+                    $filename = uniqid() . '_' . $_FILES[$field_name]['name'];
+                    $this->data["upload_data"]["file_name"] = $filename;
+                    $uploadPath = $uploadDir . $filename;
+                    if (move_uploaded_file($_FILES[$field_name]['tmp_name'], $uploadPath)) {
+                        // echo 'File uploaded successfully.';
+                        return true;
+                    } else {
+                        echo 'File upload failed.';
+                    }
                 }
             } else {
                 echo 'No file uploaded.';
